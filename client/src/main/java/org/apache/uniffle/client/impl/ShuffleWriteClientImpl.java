@@ -54,6 +54,7 @@ import org.apache.uniffle.client.request.RssApplicationInfoRequest;
 import org.apache.uniffle.client.request.RssFetchClientConfRequest;
 import org.apache.uniffle.client.request.RssFetchRemoteStorageRequest;
 import org.apache.uniffle.client.request.RssFinishShuffleRequest;
+import org.apache.uniffle.client.request.RssGetReShuffleAssignmentsRequest;
 import org.apache.uniffle.client.request.RssGetShuffleAssignmentsRequest;
 import org.apache.uniffle.client.request.RssGetShuffleResultForMultiPartRequest;
 import org.apache.uniffle.client.request.RssGetShuffleResultRequest;
@@ -167,9 +168,12 @@ public class ShuffleWriteClientImpl implements ShuffleWriteClient {
 
   private boolean sendShuffleDataAsync(
       String appId,
-      Map<ShuffleServerInfo, Map<Integer, Map<Integer, List<ShuffleBlockInfo>>>> serverToBlocks,
+      Map<ShuffleServerInfo,
+      Map<Integer, Map<Integer, List<ShuffleBlockInfo>>>> serverToBlocks,
       Map<ShuffleServerInfo, List<Long>> serverToBlockIds,
-      Map<Long, AtomicInteger> blockIdsTracker, boolean allowFastFail,
+      Map<Long, List<ShuffleServerInfo>> blockIdsSendSuccessTracker,
+      Map<Long, List<ShuffleServerInfo>> blockIdsSendFailTracker,
+      boolean allowFastFail,
       Supplier<Boolean> needCancelRequest) {
 
     if (serverToBlockIds == null) {
@@ -196,15 +200,17 @@ public class ShuffleWriteClientImpl implements ShuffleWriteClient {
 
           String logMsg = String.format("ShuffleWriteClientImpl sendShuffleData with %s blocks to %s cost: %s(ms)",
               serverToBlockIds.get(ssi).size(), ssi.getId(), System.currentTimeMillis() - s);
-
           if (response.getStatusCode() == StatusCode.SUCCESS) {
             // mark a replica of block that has been sent
-            serverToBlockIds.get(ssi).forEach(block -> blockIdsTracker.get(block).incrementAndGet());
+            serverToBlockIds.get(ssi).forEach(blockId -> blockIdsSendSuccessTracker
+                .computeIfAbsent(blockId, id -> Lists.newArrayList()).add(ssi));
             if (defectiveServers != null) {
               defectiveServers.remove(ssi);
             }
             LOG.debug("{} successfully.", logMsg);
           } else {
+            serverToBlockIds.get(ssi).forEach(blockId -> blockIdsSendFailTracker
+                .computeIfAbsent(blockId, id -> Lists.newArrayList()).add(ssi));
             if (defectiveServers != null) {
               defectiveServers.add(ssi);
             }
@@ -212,6 +218,9 @@ public class ShuffleWriteClientImpl implements ShuffleWriteClient {
             return false;
           }
         } catch (Exception e) {
+          serverToBlockIds.get(ssi).forEach(blockId -> blockIdsSendFailTracker
+              .computeIfAbsent(blockId, id -> Lists.newArrayList()).add(ssi));
+
           if (defectiveServers != null) {
             defectiveServers.add(ssi);
           }
@@ -274,15 +283,12 @@ public class ShuffleWriteClientImpl implements ShuffleWriteClient {
   @Override
   public SendShuffleDataResult sendShuffleData(String appId, List<ShuffleBlockInfo> shuffleBlockInfoList,
       Supplier<Boolean> needCancelRequest) {
-
-    // shuffleServer -> shuffleId -> partitionId -> blocks
     Map<ShuffleServerInfo, Map<Integer,
         Map<Integer, List<ShuffleBlockInfo>>>> primaryServerToBlocks = Maps.newHashMap();
     Map<ShuffleServerInfo, Map<Integer,
         Map<Integer, List<ShuffleBlockInfo>>>> secondaryServerToBlocks = Maps.newHashMap();
     Map<ShuffleServerInfo, List<Long>> primaryServerToBlockIds = Maps.newHashMap();
     Map<ShuffleServerInfo, List<Long>> secondaryServerToBlockIds = Maps.newHashMap();
-
     // send shuffle block to shuffle server
     // for all ShuffleBlockInfo, create the data structure as shuffleServer -> shuffleId -> partitionId -> blocks
     // it will be helpful to send rpc request to shuffleServer
@@ -307,29 +313,17 @@ public class ShuffleWriteClientImpl implements ShuffleWriteClient {
             null, primaryServerToBlocks, primaryServerToBlockIds, false);
       }
     }
+    Map<Long, List<ShuffleServerInfo>> blockIdSendSuccessTracker = Maps.newConcurrentMap();
+    Map<Long, List<ShuffleServerInfo>> blockIdsSendFailTracker = Maps.newConcurrentMap();
 
-    // maintain the count of blocks that have been sent to the server
-    // unnecessary to use concurrent hashmap here unless you need to insert or delete entries in other threads
-    // AtomicInteger is enough to reflect value changes in other threads
-    Map<Long, AtomicInteger> blockIdsTracker = Maps.newHashMap();
-    primaryServerToBlockIds.values().forEach(
-        blockList -> blockList.forEach(block -> blockIdsTracker.put(block, new AtomicInteger(0)))
-    );
-    secondaryServerToBlockIds.values().forEach(
-        blockList -> blockList.forEach(block -> blockIdsTracker.put(block, new AtomicInteger(0)))
-    );
-
-    Set<Long> failedBlockIds = Sets.newConcurrentHashSet();
-    Set<Long> successBlockIds = Sets.newConcurrentHashSet();
-    // if send block failed, the task will fail
-    // todo: better to have fallback solution when send to multiple servers
-
-    // sent the primary round of blocks.
+    Map<Long,List<ShuffleServerInfo>> sendFailedBlockIds = Maps.newHashMap();
+    Map<Long,List<ShuffleServerInfo>> sendSuccessBlockIds = Maps.newHashMap();
     boolean isAllSuccess = sendShuffleDataAsync(
         appId,
         primaryServerToBlocks,
         primaryServerToBlockIds,
-        blockIdsTracker,
+        blockIdSendSuccessTracker,
+        blockIdsSendFailTracker,
         secondaryServerToBlocks.isEmpty(),
         needCancelRequest
     );
@@ -344,23 +338,23 @@ public class ShuffleWriteClientImpl implements ShuffleWriteClient {
           appId,
           secondaryServerToBlocks,
           secondaryServerToBlockIds,
-          blockIdsTracker,
+          blockIdSendSuccessTracker,
+          blockIdsSendFailTracker,
           true,
           needCancelRequest
       );
     }
-
-    // check success and failed blocks according to the replicaWrite
-    blockIdsTracker.entrySet().forEach(blockCt -> {
-      long blockId = blockCt.getKey();
-      int count = blockCt.getValue().get();
-      if (count >= replicaWrite) {
-        successBlockIds.add(blockId);
-      } else {
-        failedBlockIds.add(blockId);
-      }
-    });
-    return new SendShuffleDataResult(successBlockIds, failedBlockIds);
+    blockIdSendSuccessTracker.entrySet().forEach(
+        blockIdsSendSuccess -> {
+          sendSuccessBlockIds.put(blockIdsSendSuccess.getKey(),blockIdsSendSuccess.getValue());
+        }
+    );
+    blockIdsSendFailTracker.entrySet().forEach(
+        blockIdsSendFail -> {
+          sendFailedBlockIds.put(blockIdsSendFail.getKey(),blockIdsSendFail.getValue());
+        }
+    );
+    return new SendShuffleDataResult(sendSuccessBlockIds.keySet(), sendFailedBlockIds.keySet(), sendFailedBlockIds);
   }
 
   /**
@@ -508,6 +502,34 @@ public class ShuffleWriteClientImpl implements ShuffleWriteClient {
     for (CoordinatorClient coordinatorClient : coordinatorClients) {
       try {
         response = coordinatorClient.getShuffleAssignments(request);
+      } catch (Exception e) {
+        LOG.error(e.getMessage());
+      }
+
+      if (response.getStatusCode() == StatusCode.SUCCESS) {
+        LOG.info("Success to get shuffle server assignment from {}", coordinatorClient.getDesc());
+        break;
+      }
+    }
+    String msg = "Error happened when getShuffleAssignments with appId[" + appId + "], shuffleId[" + shuffleId
+        + "], numMaps[" + partitionNum + "], partitionNumPerRange[" + partitionNumPerRange + "] to coordinator. "
+        + "Error message: " + response.getMessage();
+    throwExceptionIfNecessary(response, msg);
+
+    return new ShuffleAssignmentsInfo(response.getPartitionToServers(), response.getServerToPartitionRanges());
+  }
+
+  public ShuffleAssignmentsInfo getReShuffleAssignments(String appId, int shuffleId, int partitionNum,
+      int partitionNumPerRange, Set<String> requiredTags, int assignmentShuffleServerNumber,
+      int estimateTaskConcurrency, Set<String> failuresShuffleServerIds) {
+    RssGetReShuffleAssignmentsRequest request = new RssGetReShuffleAssignmentsRequest(
+        appId, shuffleId, partitionNum, partitionNumPerRange, replica, requiredTags,
+        assignmentShuffleServerNumber, estimateTaskConcurrency, failuresShuffleServerIds);
+
+    RssGetShuffleAssignmentsResponse response = new RssGetShuffleAssignmentsResponse(StatusCode.INTERNAL_ERROR);
+    for (CoordinatorClient coordinatorClient : coordinatorClients) {
+      try {
+        response = coordinatorClient.getReShuffleAssignments(request);
       } catch (Exception e) {
         LOG.error(e.getMessage());
       }

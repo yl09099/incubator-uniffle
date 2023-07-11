@@ -222,7 +222,6 @@ public class LocalStorageManager extends SingleStorageManager {
     String appId = event.getAppId();
     int shuffleId = event.getShuffleId();
     int partitionId = event.getStartPartition();
-
     return partitionsOfStorage.get(UnionKey.buildKey(appId, shuffleId, partitionId));
   }
 

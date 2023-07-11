@@ -80,6 +80,7 @@ public class HadoopStorageManager extends SingleStorageManager {
 
   @Override
   public Storage selectStorage(ShuffleDataReadEvent event) {
+    LOG.info("执行了吗？Hadoop");
     return getStorageByAppId(event.getAppId());
   }
 

@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.google.common.collect.Lists;
+import org.apache.uniffle.server.MockedWriteShuffleServer;
 import org.junit.jupiter.api.AfterAll;
 
 import org.apache.uniffle.common.util.RssUtils;
@@ -135,6 +136,10 @@ public abstract class IntegrationTestBase extends HadoopTestBase {
 
   protected static void createMockedShuffleServer(ShuffleServerConf serverConf) throws Exception {
     shuffleServers.add(new MockedShuffleServer(serverConf));
+  }
+
+  protected static void createWriteMockedShuffleServer(ShuffleServerConf serverConf) throws Exception {
+    shuffleServers.add(new MockedWriteShuffleServer(serverConf));
   }
 
   protected static void createAndStartServers(

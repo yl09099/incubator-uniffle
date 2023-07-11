@@ -20,13 +20,17 @@ package org.apache.spark.shuffle.writer;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.spark.TaskContext;
+
 import org.apache.uniffle.common.ShuffleBlockInfo;
 
 public class AddBlockEvent {
 
   private String taskId;
+  private TaskContext taskContext;
   private List<ShuffleBlockInfo> shuffleDataInfoList;
   private List<Runnable> processedCallbackChain;
+
 
   public AddBlockEvent(String taskId, List<ShuffleBlockInfo> shuffleDataInfoList) {
     this.taskId = taskId;

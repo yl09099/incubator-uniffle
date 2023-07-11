@@ -121,6 +121,7 @@ public class MultiStorageManager implements StorageManager {
 
   @Override
   public Storage selectStorage(ShuffleDataReadEvent event) {
+    LOG.info("执行了吗？warmStorageManager");
     return warmStorageManager.selectStorage(event);
   }
 

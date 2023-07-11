@@ -17,16 +17,16 @@
 
 package org.apache.uniffle.server;
 
+import org.apache.uniffle.common.rpc.ServerInterface;
+import org.apache.uniffle.common.rpc.ServerType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import org.apache.uniffle.common.rpc.ServerInterface;
-import org.apache.uniffle.common.rpc.ServerType;
+public class MockedWriteShuffleServerFactory extends ShuffleServerFactory {
 
-public class MockedShuffleServerFactory extends ShuffleServerFactory {
   private static final Logger LOG = LoggerFactory.getLogger(MockedShuffleServerFactory.class);
 
-  public MockedShuffleServerFactory(MockedShuffleServer shuffleServer) {
+  public MockedWriteShuffleServerFactory(MockedWriteShuffleServer shuffleServer) {
     super(shuffleServer);
   }
 
@@ -34,11 +34,11 @@ public class MockedShuffleServerFactory extends ShuffleServerFactory {
   public ServerInterface getServer() {
     ShuffleServerConf conf = getConf();
     ShuffleServer shuffleServer = getShuffleServer();
-    LOG.info("execute MockedShuffleServerFactory");
     ServerType type = conf.get(ShuffleServerConf.RPC_SERVER_TYPE);
+    LOG.info("MockedWriteShuffleServerFactory execute le mei");
     if (type == ServerType.GRPC) {
-      return new MockedGrpcServer(conf, new MockedShuffleServerGrpcService(shuffleServer),
-        shuffleServer.getGrpcMetrics());
+      return new MockedShuffleWriteGrpcServer(conf, new MockedShuffleServerWriteGrpcService(shuffleServer),
+          shuffleServer.getGrpcMetrics());
     } else {
       throw new UnsupportedOperationException("Unsupported server type " + type);
     }

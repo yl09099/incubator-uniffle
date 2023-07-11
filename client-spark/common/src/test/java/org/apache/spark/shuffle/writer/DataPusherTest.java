@@ -33,6 +33,7 @@ import org.junit.jupiter.api.Test;
 import org.apache.uniffle.client.impl.ShuffleWriteClientImpl;
 import org.apache.uniffle.client.response.SendShuffleDataResult;
 import org.apache.uniffle.common.ShuffleBlockInfo;
+import org.apache.uniffle.common.ShuffleServerInfo;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -84,12 +85,14 @@ public class DataPusherTest {
 
     Map<String, Set<Long>> taskToSuccessBlockIds = Maps.newConcurrentMap();
     Map<String, Set<Long>> taskToFailedBlockIds = Maps.newConcurrentMap();
+    Map<String, Map<Long, List<ShuffleServerInfo>>> taskToFailedBlockIdsAndServer = Maps.newConcurrentMap();
     Set<String> failedTaskIds = new HashSet<>();
 
     DataPusher dataPusher = new DataPusher(
         shuffleWriteClient,
         taskToSuccessBlockIds,
         taskToFailedBlockIds,
+        taskToFailedBlockIdsAndServer,
         failedTaskIds,
         1,
         2
@@ -105,7 +108,8 @@ public class DataPusherTest {
     shuffleWriteClient.setFakedShuffleDataResult(
         new SendShuffleDataResult(
             Sets.newHashSet(1L, 2L),
-            Sets.newHashSet(3L, 4L)
+            Sets.newHashSet(3L, 4L),
+            Maps.newConcurrentMap()
         )
     );
     CompletableFuture<Long> future = dataPusher.send(event);

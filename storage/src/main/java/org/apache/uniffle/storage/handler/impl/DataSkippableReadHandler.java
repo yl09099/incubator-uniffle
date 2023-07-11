@@ -68,6 +68,7 @@ public abstract class DataSkippableReadHandler extends AbstractClientReadHandler
   @Override
   public ShuffleDataResult readShuffleData() {
     if (shuffleDataSegments.isEmpty()) {
+      LOG.info("这里是不是没有执行");
       ShuffleIndexResult shuffleIndexResult = readShuffleIndex();
       if (shuffleIndexResult == null || shuffleIndexResult.isEmpty()) {
         return null;

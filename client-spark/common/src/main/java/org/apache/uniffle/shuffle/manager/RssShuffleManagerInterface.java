@@ -18,8 +18,9 @@
 package org.apache.uniffle.shuffle.manager;
 
 import org.apache.spark.SparkException;
+import org.apache.spark.shuffle.ShuffleHandleInfo;
 
-
+import org.apache.uniffle.common.ShuffleServerInfo;
 
 /**
  * This is a proxy interface that mainly delegates the un-registration of shuffles to the MapOutputTrackerMaster on
@@ -55,4 +56,19 @@ public interface RssShuffleManagerInterface {
    * @throws SparkException
    */
   void unregisterAllMapOutput(int shuffleId) throws SparkException;
+
+  /**
+   * Add the shuffleServer that failed to write to the failure list
+   * @param shuffleServerId
+   */
+  void addFailuresShuffleServerInfos(String shuffleServerId);
+
+  /**
+   * Get ShuffleHandleInfo with ShuffleId
+   * @param shuffleId
+   * @return ShuffleHandleInfo
+   */
+  ShuffleHandleInfo getShuffleHandleInfoByShuffleId(int shuffleId);
+
+  boolean reShuffleAssignments(int stageId,int stageAttemptNumber,int shuffleId, int numMaps);
 }

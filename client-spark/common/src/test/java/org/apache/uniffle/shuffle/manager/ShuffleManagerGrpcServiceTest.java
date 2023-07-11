@@ -17,11 +17,17 @@
 
 package org.apache.uniffle.shuffle.manager;
 
+import java.util.List;
+
+import com.clearspring.analytics.util.Lists;
 import io.grpc.stub.StreamObserver;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
+import org.apache.uniffle.client.request.RssReportShuffleWriteFailureRequest;
+import org.apache.uniffle.common.ShuffleServerInfo;
+import org.apache.uniffle.proto.RssProtos;
 import org.apache.uniffle.proto.RssProtos.ReportShuffleFetchFailureRequest;
 import org.apache.uniffle.proto.RssProtos.ReportShuffleFetchFailureResponse;
 import org.apache.uniffle.proto.RssProtos.StatusCode;
@@ -103,5 +109,79 @@ public class ShuffleManagerGrpcServiceTest {
     service.reportShuffleFetchFailure(req, appIdResponseObserver);
     assertEquals(StatusCode.INVALID_REQUEST, appIdResponseObserver.value.getStatus());
     assertTrue(appIdResponseObserver.value.getMsg().contains("old stage"));
+  }
+
+  @Test
+  public void testReportShuffleWriteFailure() {
+    List<ShuffleServerInfo> shuffleServers = Lists.newArrayList();
+    ShuffleServerInfo shuffleServerInfo1 = new ShuffleServerInfo("server01", 0);
+    ShuffleServerInfo shuffleServerInfo2 = new ShuffleServerInfo("server02", 0);
+    ShuffleServerInfo shuffleServerInfo3 = new ShuffleServerInfo("server03", 0);
+    ShuffleServerInfo shuffleServerInfo4 = new ShuffleServerInfo("server04", 0);
+    shuffleServers.add(shuffleServerInfo1);
+    shuffleServers.add(shuffleServerInfo2);
+    shuffleServers.add(shuffleServerInfo3);
+    shuffleServers.add(shuffleServerInfo4);
+    /**
+     * Determine whether the Application is the same
+     */
+    RssReportShuffleWriteFailureRequest rssFailureRequest =
+        new RssReportShuffleWriteFailureRequest("appid01", 0, 0, shuffleServers, "");
+    RssProtos.ReportShuffleWriteFailureRequest reportFailureRequest = rssFailureRequest.toProto();
+    final ShuffleManagerGrpcService service = new ShuffleManagerGrpcService(mockShuffleManager);
+    final MockedStreamObserver<RssProtos.ReportShuffleWriteFailureResponse> appIdResponseObserver =
+        new MockedStreamObserver<>();
+    service.reportShuffleWriteFailure(reportFailureRequest, appIdResponseObserver);
+    assertTrue(appIdResponseObserver.completed);
+    assertEquals(StatusCode.INVALID_REQUEST, appIdResponseObserver.value.getStatus());
+    assertTrue(appIdResponseObserver.value.getMsg().contains("wrong shuffle fetch failure report from appId"));
+
+    /**
+     * Normal submission application
+     */
+    RssReportShuffleWriteFailureRequest rssSuccessRequest =
+        new RssReportShuffleWriteFailureRequest("app-123", 0, 0, shuffleServers, "");
+    RssProtos.ReportShuffleWriteFailureRequest reprotSuccessRequest = rssSuccessRequest.toProto();
+    service.reportShuffleWriteFailure(reprotSuccessRequest, appIdResponseObserver);
+    assertTrue(appIdResponseObserver.completed);
+    assertEquals(StatusCode.SUCCESS, appIdResponseObserver.value.getStatus());
+    assertFalse(appIdResponseObserver.value.getReSubmitWholeStage());
+
+    /**
+     * Continuous commit to get the ShuffleServer list
+     */
+    RssReportShuffleWriteFailureRequest rssSuccessRequest01 =
+        new RssReportShuffleWriteFailureRequest("app-123", 0, 0, shuffleServers, "");
+    RssProtos.ReportShuffleWriteFailureRequest reprotSuccessRequest01 = rssSuccessRequest01.toProto();
+    service.reportShuffleWriteFailure(reprotSuccessRequest01, appIdResponseObserver);
+
+    List<ShuffleServerInfo> shuffleServers02 = Lists.newArrayList();
+    shuffleServers02.add(shuffleServerInfo1);
+    shuffleServers02.add(shuffleServerInfo2);
+    shuffleServers02.add(shuffleServerInfo3);
+    RssReportShuffleWriteFailureRequest rssSuccessRequest02 =
+        new RssReportShuffleWriteFailureRequest("app-123", 0, 0, shuffleServers, "");
+    RssProtos.ReportShuffleWriteFailureRequest reprotSuccessRequest02 = rssSuccessRequest02.toProto();
+    service.reportShuffleWriteFailure(reprotSuccessRequest02, appIdResponseObserver);
+
+    List<ShuffleServerInfo> shuffleServers03 = Lists.newArrayList();
+    shuffleServers03.add(shuffleServerInfo1);
+    shuffleServers03.add(shuffleServerInfo2);
+    RssReportShuffleWriteFailureRequest rssSuccessRequest03 =
+        new RssReportShuffleWriteFailureRequest("app-123", 0, 0, shuffleServers, "");
+    RssProtos.ReportShuffleWriteFailureRequest reprotSuccessRequest03 = rssSuccessRequest03.toProto();
+    service.reportShuffleWriteFailure(reprotSuccessRequest03, appIdResponseObserver);
+
+    List<ShuffleServerInfo> shuffleServers04 = Lists.newArrayList();
+    shuffleServers04.add(shuffleServerInfo1);
+    shuffleServers04.add(shuffleServerInfo2);
+    RssReportShuffleWriteFailureRequest rssSuccessRequest04 =
+        new RssReportShuffleWriteFailureRequest("app-123", 0, 0, shuffleServers, "");
+    RssProtos.ReportShuffleWriteFailureRequest reprotSuccessRequest04 = rssSuccessRequest04.toProto();
+    service.reportShuffleWriteFailure(reprotSuccessRequest04, appIdResponseObserver);
+    assertTrue(appIdResponseObserver.completed);
+    assertEquals(StatusCode.SUCCESS, appIdResponseObserver.value.getStatus());
+    assertTrue(appIdResponseObserver.value.getReSubmitWholeStage());
+    assertTrue(appIdResponseObserver.value.getMsg().contains("write failure as maximum number(2)"));
   }
 }

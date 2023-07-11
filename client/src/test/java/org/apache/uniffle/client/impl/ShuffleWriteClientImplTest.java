@@ -86,6 +86,7 @@ public class ShuffleWriteClientImplTest {
     SendShuffleDataResult result = spyClient.sendShuffleData("appId", shuffleBlockInfoList, () -> false);
 
     assertTrue(result.getFailedBlockIds().contains(10L));
+    assertEquals(result.getSendFailedBlockIds().get(10L).get(0).getId(), shuffleServerInfoList.get(0).getId());
   }
 
   @Test

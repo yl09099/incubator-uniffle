@@ -83,13 +83,16 @@ public class RssShuffleWriterTest {
     final SparkContext sc = SparkContext.getOrCreate(conf);
     Map<String, Set<Long>> failBlocks = JavaUtils.newConcurrentMap();
     Map<String, Set<Long>> successBlocks = JavaUtils.newConcurrentMap();
+    Map<String, Map<Long, List<ShuffleServerInfo>>> taskToFailedBlockIdsWithShuffleServer
+        = JavaUtils.newConcurrentMap();
     Serializer kryoSerializer = new KryoSerializer(conf);
     RssShuffleManager manager = TestUtils.createShuffleManager(
         conf,
         false,
         null,
         successBlocks,
-        failBlocks);
+        failBlocks,
+        taskToFailedBlockIdsWithShuffleServer);
 
     ShuffleWriteClient mockShuffleWriteClient = mock(ShuffleWriteClient.class);
     Partitioner mockPartitioner = mock(Partitioner.class);
@@ -109,7 +112,7 @@ public class RssShuffleWriterTest {
 
     RssShuffleWriter<String, String, String> rssShuffleWriter = new RssShuffleWriter<>("appId", 0, "taskId", 1L,
         bufferManagerSpy, (new TaskMetrics()).shuffleWriteMetrics(),
-        manager, conf, mockShuffleWriteClient, mockHandle);
+        manager, conf, mockShuffleWriteClient, mockHandle, null, null,null);
     doReturn(1000000L).when(bufferManagerSpy).acquireMemory(anyLong());
 
     // case 1: all blocks are sent successfully
@@ -141,18 +144,22 @@ public class RssShuffleWriterTest {
     private final Function<AddBlockEvent, CompletableFuture<Long>> sendFunc;
 
     FakedDataPusher(Function<AddBlockEvent, CompletableFuture<Long>> sendFunc) {
-      this(null, null, null, null, 1, 1, sendFunc);
+      this(null, null, null, null, null, 1, 1, sendFunc);
     }
 
     private FakedDataPusher(
         ShuffleWriteClient shuffleWriteClient,
         Map<String, Set<Long>> taskToSuccessBlockIds,
         Map<String, Set<Long>> taskToFailedBlockIds,
+        Map<String, Map<Long, List<ShuffleServerInfo>>> taskToFailedBlockIdsAndServer,
         Set<String> failedTaskIds,
         int threadPoolSize,
         int threadKeepAliveTime,
         Function<AddBlockEvent, CompletableFuture<Long>> sendFunc) {
-      super(shuffleWriteClient, taskToSuccessBlockIds, taskToFailedBlockIds, failedTaskIds, threadPoolSize,
+      super(shuffleWriteClient, taskToSuccessBlockIds, taskToFailedBlockIds,
+          taskToFailedBlockIdsAndServer,
+          failedTaskIds,
+          threadPoolSize,
           threadKeepAliveTime);
       this.sendFunc = sendFunc;
     }
@@ -198,6 +205,7 @@ public class RssShuffleWriterTest {
         false,
         dataPusher,
         successBlockIds,
+        JavaUtils.newConcurrentMap(),
         JavaUtils.newConcurrentMap());
     Serializer kryoSerializer = new KryoSerializer(conf);
     Partitioner mockPartitioner = mock(Partitioner.class);
@@ -241,8 +249,10 @@ public class RssShuffleWriterTest {
     bufferManager.setTaskId("taskId");
 
     WriteBufferManager bufferManagerSpy = spy(bufferManager);
-    RssShuffleWriter<String, String, String> rssShuffleWriter = new RssShuffleWriter<>("appId", 0, "taskId", 1L,
-        bufferManagerSpy, shuffleWriteMetrics, manager, conf, mockShuffleWriteClient, mockHandle);
+    RssShuffleWriter<String, String, String> rssShuffleWriter =
+        new RssShuffleWriter<>("appId", 0, "taskId", 1L,
+        bufferManagerSpy, shuffleWriteMetrics, manager, conf,
+        mockShuffleWriteClient, mockHandle, null, null,null);
     doReturn(1000000L).when(bufferManagerSpy).acquireMemory(anyLong());
 
 
@@ -324,6 +334,7 @@ public class RssShuffleWriterTest {
         false,
         dataPusher,
         Maps.newConcurrentMap(),
+        Maps.newConcurrentMap(),
         Maps.newConcurrentMap()));
 
     RssShuffleHandle<String, String, String> mockHandle = mock(RssShuffleHandle.class);
@@ -341,7 +352,10 @@ public class RssShuffleWriterTest {
         mockShuffleManager,
         conf,
         mockWriteClient,
-        mockHandle
+        mockHandle,
+        null,
+        null,
+        null
     );
     writer.postBlockEvent(shuffleBlockInfoList);
     Awaitility.await().timeout(Duration.ofSeconds(1)).until(() -> events.size() == 1);

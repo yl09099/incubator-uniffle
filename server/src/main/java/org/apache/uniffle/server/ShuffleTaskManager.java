@@ -209,6 +209,7 @@ public class ShuffleTaskManager {
     for (PartitionRange partitionRange : partitionRanges) {
       shuffleBufferManager.registerBuffer(appId, shuffleId, partitionRange.getStart(), partitionRange.getEnd());
     }
+    LOG.info("remoteStorageInfo:{}",remoteStorageInfo.getPath());
     if (!remoteStorageInfo.isEmpty()) {
       storageManager.registerRemoteStorage(appId, remoteStorageInfo);
     }
@@ -519,6 +520,7 @@ public class ShuffleTaskManager {
     request.setPartitionNum(partitionNum);
     request.setStorageType(storageType);
     request.setRssBaseConf(conf);
+    LOG.info("这里的partitionid:{},{},{},{}",partitionId,partitionNumPerRange,partitionNum);
     int[] range = ShuffleStorageUtils.getPartitionRange(partitionId, partitionNumPerRange, partitionNum);
     Storage storage = storageManager.selectStorage(new ShuffleDataReadEvent(appId, shuffleId, partitionId, range[0]));
     if (storage == null) {
