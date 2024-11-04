@@ -245,8 +245,8 @@ public class ShuffleServerGrpcService extends ShuffleServerImplBase {
               + stageAttemptNumber);
       // If the Stage is registered for the first time, you do not need to consider the Stage retry
       // and delete the Block data that has been sent.
-      if (stageAttemptNumber > 0) {
-        ShuffleTaskInfo taskInfo = shuffleServer.getShuffleTaskManager().getShuffleTaskInfo(appId);
+      ShuffleTaskInfo taskInfo = shuffleServer.getShuffleTaskManager().getShuffleTaskInfo(appId);
+      if (taskInfo != null && stageAttemptNumber > 0) {
         // Prevents AttemptNumber of multiple stages from modifying the latest AttemptNumber.
         synchronized (taskInfo) {
           int attemptNumber = taskInfo.getLatestStageAttemptNumber(shuffleId);
