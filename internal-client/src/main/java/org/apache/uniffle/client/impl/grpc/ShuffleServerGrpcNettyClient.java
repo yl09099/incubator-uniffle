@@ -18,6 +18,7 @@
 package org.apache.uniffle.client.impl.grpc;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -26,7 +27,6 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.lang3.tuple.Pair;
-import org.apache.hbase.thirdparty.org.glassfish.jersey.internal.guava.Sets;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -142,7 +142,7 @@ public class ShuffleServerGrpcNettyClient extends ShuffleServerGrpcClient {
     int stageAttemptNumber = request.getStageAttemptNumber();
     boolean isSuccessful = true;
     AtomicReference<StatusCode> failedStatusCode = new AtomicReference<>(StatusCode.INTERNAL_ERROR);
-    Set<Integer> needSplitPartitionIds = Sets.newHashSet();
+    Set<Integer> needSplitPartitionIds = new HashSet<>();
     for (Map.Entry<Integer, Map<Integer, List<ShuffleBlockInfo>>> stb :
         shuffleIdToBlocks.entrySet()) {
       int shuffleId = stb.getKey();
