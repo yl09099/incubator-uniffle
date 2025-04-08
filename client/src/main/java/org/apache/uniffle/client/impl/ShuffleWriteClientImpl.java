@@ -703,9 +703,9 @@ public class ShuffleWriteClientImpl implements ShuffleWriteClient {
               + partitionNumPerRange
               + "] to coordinator. "
               + "Error message: "
-              + response.getMessage();
+              + e.getMessage();
       LOG.error(msg);
-      throw new RssException(msg);
+      throw new RssException(msg, e);
     }
 
     return new ShuffleAssignmentsInfo(
