@@ -52,7 +52,7 @@ import static org.apache.tez.common.RssTezConfig.RSS_REMOTE_SPILL_STORAGE_PATH;
 
 public class RssMergeManager extends MergeManager {
 
-  private static final Logger LOG = LoggerFactory.getLogger(MergeManager.class);
+  private static final Logger LOG = LoggerFactory.getLogger(RssMergeManager.class);
 
   private Configuration conf;
   private InputContext inputContext;
