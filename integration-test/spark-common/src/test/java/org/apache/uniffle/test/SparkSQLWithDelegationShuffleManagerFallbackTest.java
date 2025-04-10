@@ -57,7 +57,8 @@ public class SparkSQLWithDelegationShuffleManagerFallbackTest extends SparkSQLTe
     addDynamicConf(coordinatorConf, dynamicConf);
     storeCoordinatorConf(coordinatorConf);
 
-    ShuffleServerConf shuffleServerConf = shuffleServerConfWithoutPort(0, tmpDir, ServerType.GRPC);
+    ShuffleServerConf shuffleServerConf =
+        shuffleServerConfWithoutPort(0, tmpDir, ServerType.GRPC_NETTY);
     shuffleServerConf.set(ShuffleServerConf.SERVER_HEARTBEAT_INTERVAL, 1000L);
     shuffleServerConf.set(ShuffleServerConf.SERVER_APP_EXPIRED_WITHOUT_HEARTBEAT, 4000L);
     shuffleServerConf.setString(

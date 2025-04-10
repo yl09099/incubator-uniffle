@@ -93,7 +93,7 @@ public class RssShuffleManagerTest extends SparkIntegrationTestBase {
     CoordinatorConf coordinatorConf = coordinatorConfWithoutPort();
     addDynamicConf(coordinatorConf, dynamicConf);
     storeCoordinatorConf(coordinatorConf);
-    storeShuffleServerConf(shuffleServerConfWithoutPort(0, tempDir, ServerType.GRPC));
+    storeShuffleServerConf(shuffleServerConfWithoutPort(0, tempDir, ServerType.GRPC_NETTY));
     startServersWithRandomPorts();
     return dynamicConf;
   }
@@ -146,7 +146,7 @@ public class RssShuffleManagerTest extends SparkIntegrationTestBase {
     Map<String, String> dynamicConf = startServers(dynamicConfLayout);
 
     SparkConf conf = createSparkConf();
-    updateSparkConfWithRssGrpc(conf);
+    updateSparkConfWithRssNetty(conf);
     // enable stage recompute
     conf.set("spark." + RssClientConfig.RSS_RESUBMIT_STAGE, "true");
     // enable dynamic client conf
@@ -204,7 +204,7 @@ public class RssShuffleManagerTest extends SparkIntegrationTestBase {
       shuffleManager.configureBlockIdLayout(conf, rssConf);
       ShuffleWriteClient shuffleWriteClient =
           ShuffleClientFactory.newWriteBuilder()
-              .clientType(ClientType.GRPC.name())
+              .clientType(ClientType.GRPC_NETTY.name())
               .retryMax(3)
               .retryIntervalMax(2000)
               .heartBeatThreadNum(4)
@@ -228,7 +228,7 @@ public class RssShuffleManagerTest extends SparkIntegrationTestBase {
       for (int partitionId : new int[] {0, 1}) {
         Roaring64NavigableMap blockIdLongs =
             shuffleWriteClient.getShuffleResult(
-                ClientType.GRPC.name(), servers, shuffleManager.getAppId(), 0, partitionId);
+                ClientType.GRPC_NETTY.name(), servers, shuffleManager.getAppId(), 0, partitionId);
         List<BlockId> blockIds =
             blockIdLongs.stream()
                 .sorted()

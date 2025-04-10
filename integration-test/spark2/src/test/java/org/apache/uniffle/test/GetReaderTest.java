@@ -89,7 +89,7 @@ public class GetReaderTest extends IntegrationTestBase {
     coordinatorConf.setInteger("rss.coordinator.remote.storage.schedule.access.times", 1);
     storeCoordinatorConf(coordinatorConf);
 
-    storeShuffleServerConf(shuffleServerConfWithoutPort(0, tmpDir, ServerType.GRPC));
+    storeShuffleServerConf(shuffleServerConfWithoutPort(0, tmpDir, ServerType.GRPC_NETTY));
     startServersWithRandomPorts();
     Uninterruptibles.sleepUninterruptibly(2, TimeUnit.SECONDS);
 
