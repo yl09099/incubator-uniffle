@@ -60,4 +60,4 @@ This experimental feature allows to reduce tasks to spill data to remote storage
 |tez.rss.reduce.remote.spill.replication|1| The replication number to spill data to Hadoop FS                      |
 |tez.rss.reduce.remote.spill.retries|5| The retry number to spill data to Hadoop FS                            |
 
-Notice: this feature requires the MEMORY_LOCAL_HADOOP mode.
+Notice: this feature requires the MEMORY_LOCALFILE_HDFS storage type mode.
