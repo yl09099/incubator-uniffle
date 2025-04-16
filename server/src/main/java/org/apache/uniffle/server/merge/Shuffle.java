@@ -20,6 +20,7 @@ package org.apache.uniffle.server.merge;
 import java.io.IOException;
 import java.util.Comparator;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
 
 import com.google.common.annotations.VisibleForTesting;
 import org.roaringbitmap.longlong.Roaring64NavigableMap;
@@ -69,8 +70,23 @@ public class Shuffle<K, V> {
 
   public void startSortMerge(int partitionId, Roaring64NavigableMap expectedBlockIdMap)
       throws IOException {
-    this.partitions.putIfAbsent(partitionId, new Partition<K, V>(this, partitionId));
-    this.partitions.get(partitionId).startSortMerge(expectedBlockIdMap);
+    AtomicReference<IOException> exception = new AtomicReference<>();
+    Partition<K, V> partition =
+        this.partitions.computeIfAbsent(
+            partitionId,
+            key -> {
+              try {
+                return new Partition<K, V>(this, partitionId);
+              } catch (IOException e) {
+                exception.set(e);
+              }
+              return null;
+            });
+    if (exception.get() != null) {
+      throw exception.get();
+    }
+    assert partition != null;
+    partition.startSortMerge(expectedBlockIdMap);
   }
 
   void cleanup() {
