@@ -155,15 +155,6 @@ public interface ShuffleWriteClient {
       long taskAttemptId,
       int bitmapNum);
 
-  default void reportShuffleResult(
-      Map<ShuffleServerInfo, Map<Integer, Set<Long>>> serverToPartitionToBlockIds,
-      String appId,
-      int shuffleId,
-      long taskAttemptId,
-      int bitmapNum,
-      Set<ShuffleServerInfo> reportFailureServers,
-      boolean enableWriteFailureRetry) {}
-
   ShuffleAssignmentsInfo getShuffleAssignments(
       String appId,
       int shuffleId,
@@ -173,8 +164,6 @@ public interface ShuffleWriteClient {
       int assignmentShuffleServerNumber,
       int estimateTaskConcurrency,
       Set<String> faultyServerIds,
-      int stageId,
-      int stageAttemptNumber,
       boolean reassign,
       long retryIntervalMs,
       int retryTimes);
@@ -197,8 +186,6 @@ public interface ShuffleWriteClient {
         assignmentShuffleServerNumber,
         estimateTaskConcurrency,
         faultyServerIds,
-        -1,
-        0,
         false,
         0,
         0);
@@ -235,6 +222,7 @@ public interface ShuffleWriteClient {
       Map<ShuffleServerInfo, Set<Integer>> serverToPartitions,
       String appId,
       int shuffleId,
+      int uniffleShuffleId,
       Set<Integer> failedPartitions,
       PartitionDataReplicaRequirementTracking replicaRequirementTracking);
 

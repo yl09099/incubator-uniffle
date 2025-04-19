@@ -272,6 +272,12 @@ public class RssClientConf {
           .withDescription(
               "Whether to support rss client block send failure retry, default value is false.");
 
+  public static final ConfigOption<Boolean> RSS_STAGE_RETRY_ENABLED =
+      ConfigOptions.key("rss.stage.retry.enabled")
+          .booleanType()
+          .defaultValue(false)
+          .withDescription("Whether Stage retry is supported, default value is false.");
+
   public static final ConfigOption<PartitionSplitMode> RSS_CLIENT_PARTITION_SPLIT_MODE =
       ConfigOptions.key("rss.client.reassign.partitionSplitMode")
           .enumType(PartitionSplitMode.class)

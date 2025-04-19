@@ -15,25 +15,23 @@
  * limitations under the License.
  */
 
-package org.apache.uniffle.client.request;
+package org.apache.uniffle.client.response;
 
 import org.apache.uniffle.proto.RssProtos;
 
-public class RssPartitionToShuffleServerRequest {
-  private int shuffleId;
+public class RssAppUniffleShuffleIdResponse {
+  private final int generatorShuffleId;
 
-  public RssPartitionToShuffleServerRequest(int shuffleId) {
-    this.shuffleId = shuffleId;
+  public RssAppUniffleShuffleIdResponse(int generatorShuffleId) {
+    this.generatorShuffleId = generatorShuffleId;
   }
 
-  public int getShuffleId() {
-    return shuffleId;
+  public int getGeneratorShuffleId() {
+    return generatorShuffleId;
   }
 
-  public RssProtos.PartitionToShuffleServerRequest toProto() {
-    RssProtos.PartitionToShuffleServerRequest.Builder builder =
-        RssProtos.PartitionToShuffleServerRequest.newBuilder();
-    builder.setShuffleId(shuffleId);
-    return builder.build();
+  public static RssAppUniffleShuffleIdResponse fromProto(
+      RssProtos.AppUniffleShuffleIdResponse response) {
+    return new RssAppUniffleShuffleIdResponse(response.getGeneratorShuffleId());
   }
 }

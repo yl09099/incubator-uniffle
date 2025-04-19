@@ -214,7 +214,6 @@ public class ShuffleServerGrpcClient extends GrpcClient implements ShuffleServer
       String user,
       ShuffleDataDistributionType dataDistributionType,
       int maxConcurrencyPerPartitionToWrite,
-      int stageAttemptNumber,
       MergeContext mergeContext,
       Map<String, String> properties) {
     ShuffleRegisterRequest.Builder reqBuilder = ShuffleRegisterRequest.newBuilder();
@@ -225,7 +224,6 @@ public class ShuffleServerGrpcClient extends GrpcClient implements ShuffleServer
         .setShuffleDataDistribution(RssProtos.DataDistribution.valueOf(dataDistributionType.name()))
         .setMaxConcurrencyPerPartitionToWrite(maxConcurrencyPerPartitionToWrite)
         .addAllPartitionRanges(toShufflePartitionRanges(partitionRanges))
-        .setStageAttemptNumber(stageAttemptNumber)
         .putAllProperties(properties);
     if (mergeContext != null) {
       reqBuilder.setMergeContext(mergeContext);
@@ -505,7 +503,6 @@ public class ShuffleServerGrpcClient extends GrpcClient implements ShuffleServer
             request.getUser(),
             request.getDataDistributionType(),
             request.getMaxConcurrencyPerPartitionToWrite(),
-            request.getStageAttemptNumber(),
             request.getMergeContext(),
             request.getProperties());
 

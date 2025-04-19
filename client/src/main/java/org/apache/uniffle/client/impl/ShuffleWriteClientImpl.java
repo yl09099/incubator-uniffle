@@ -91,7 +91,6 @@ import org.apache.uniffle.common.ShuffleServerInfo;
 import org.apache.uniffle.common.config.RssConf;
 import org.apache.uniffle.common.exception.RssException;
 import org.apache.uniffle.common.exception.RssFetchFailedException;
-import org.apache.uniffle.common.exception.RssSendFailedException;
 import org.apache.uniffle.common.rpc.StatusCode;
 import org.apache.uniffle.common.util.BlockIdLayout;
 import org.apache.uniffle.common.util.JavaUtils;
@@ -663,8 +662,6 @@ public class ShuffleWriteClientImpl implements ShuffleWriteClient {
       int assignmentShuffleServerNumber,
       int estimateTaskConcurrency,
       Set<String> faultyServerIds,
-      int stageId,
-      int stageAttemptNumber,
       boolean reassign,
       long retryIntervalMs,
       int retryTimes) {
@@ -679,8 +676,6 @@ public class ShuffleWriteClientImpl implements ShuffleWriteClient {
             assignmentShuffleServerNumber,
             estimateTaskConcurrency,
             faultyServerIds,
-            stageId,
-            stageAttemptNumber,
             reassign,
             retryIntervalMs,
             retryTimes);
@@ -719,25 +714,6 @@ public class ShuffleWriteClientImpl implements ShuffleWriteClient {
       int shuffleId,
       long taskAttemptId,
       int bitmapNum) {
-    reportShuffleResult(
-        serverToPartitionToBlockIds,
-        appId,
-        shuffleId,
-        taskAttemptId,
-        bitmapNum,
-        Sets.newConcurrentHashSet(),
-        false);
-  }
-
-  @Override
-  public void reportShuffleResult(
-      Map<ShuffleServerInfo, Map<Integer, Set<Long>>> serverToPartitionToBlockIds,
-      String appId,
-      int shuffleId,
-      long taskAttemptId,
-      int bitmapNum,
-      Set<ShuffleServerInfo> reportFailureServers,
-      boolean enableWriteFailureRetry) {
     // record blockId count for quora check,but this is not a good realization.
     Map<Long, Integer> blockReportTracker = createBlockReportTracker(serverToPartitionToBlockIds);
     for (Map.Entry<ShuffleServerInfo, Map<Integer, Set<Long>>> entry :
@@ -775,13 +751,6 @@ public class ShuffleWriteClientImpl implements ShuffleWriteClient {
               response.getStatusCode(),
               System.currentTimeMillis() - start);
           recordFailedBlockIds(blockReportTracker, requestBlockIds);
-          if (enableWriteFailureRetry) {
-            // The failed Shuffle Server is recorded and corresponding exceptions are raised only
-            // when the retry function is started.
-            reportFailureServers.add(ssi);
-            throw new RssSendFailedException(
-                "Throw an exception because the report shuffle result status code is not SUCCESS.");
-          }
         }
       } catch (Exception e) {
         LOG.warn(
@@ -793,13 +762,6 @@ public class ShuffleWriteClientImpl implements ShuffleWriteClient {
                 + shuffleId
                 + "]");
         recordFailedBlockIds(blockReportTracker, requestBlockIds);
-        if (enableWriteFailureRetry) {
-          // The failed Shuffle Server is recorded and corresponding exceptions are raised only when
-          // the retry function is started.
-          reportFailureServers.add(ssi);
-          throw new RssSendFailedException(
-              "Throw an exception because the report shuffle result status code is not SUCCESS.");
-        }
       }
     }
     if (blockReportTracker.values().stream().anyMatch(cnt -> cnt < replicaWrite)) {
@@ -882,6 +844,7 @@ public class ShuffleWriteClientImpl implements ShuffleWriteClient {
       Map<ShuffleServerInfo, Set<Integer>> serverToPartitions,
       String appId,
       int shuffleId,
+      int uniffleShuffleId,
       Set<Integer> failedPartitions,
       PartitionDataReplicaRequirementTracking replicaRequirementTracking) {
     Roaring64NavigableMap blockIdBitmap = Roaring64NavigableMap.bitmapOf();

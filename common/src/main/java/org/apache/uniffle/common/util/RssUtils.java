@@ -59,6 +59,7 @@ import org.apache.uniffle.common.ShuffleServerInfo;
 import org.apache.uniffle.common.config.RssBaseConf;
 import org.apache.uniffle.common.config.RssConf;
 import org.apache.uniffle.common.exception.RssException;
+import org.apache.uniffle.common.exception.RssFetchFailedException;
 import org.apache.uniffle.common.rpc.ServerInterface;
 
 import static org.apache.uniffle.common.config.RssClientConf.RSS_CLIENT_EXTRA_JAVA_SYSTEM_PROPERTIES;
@@ -390,7 +391,7 @@ public class RssUtils {
       cloneBitmap = RssUtils.cloneBitMap(blockIdBitmap);
       cloneBitmap.and(processedBlockIds);
       if (!blockIdBitmap.equals(cloneBitmap)) {
-        throw new RssException(
+        throw new RssFetchFailedException(
             "Blocks read inconsistent: expected "
                 + blockIdBitmap.getLongCardinality()
                 + " blocks, actual "

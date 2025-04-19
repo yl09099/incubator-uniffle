@@ -120,6 +120,7 @@ public class BlockIdSelfManagedShuffleWriteClient extends ShuffleWriteClientImpl
       Map<ShuffleServerInfo, Set<Integer>> serverToPartitions,
       String appId,
       int shuffleId,
+      int uniffleShuffleId,
       Set<Integer> failedPartitions,
       PartitionDataReplicaRequirementTracking replicaRequirementTracking) {
     Set<Integer> partitionIds =

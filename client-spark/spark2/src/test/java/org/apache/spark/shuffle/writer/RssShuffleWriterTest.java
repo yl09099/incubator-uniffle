@@ -120,6 +120,7 @@ public class RssShuffleWriterTest {
         new RssShuffleWriter<>(
             "appId",
             0,
+            0,
             taskId,
             1L,
             bufferManagerSpy,
@@ -298,6 +299,7 @@ public class RssShuffleWriterTest {
         new RssShuffleWriter<>(
             "appId",
             0,
+            0,
             "taskId",
             1L,
             bufferManagerSpy,
@@ -411,6 +413,7 @@ public class RssShuffleWriterTest {
     RssShuffleWriter<String, String, String> writer =
         new RssShuffleWriter<>(
             "appId",
+            0,
             0,
             "taskId",
             1L,

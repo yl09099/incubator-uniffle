@@ -39,7 +39,6 @@ public class RssRegisterShuffleRequest {
   private String user;
   private ShuffleDataDistributionType dataDistributionType;
   private int maxConcurrencyPerPartitionToWrite;
-  private int stageAttemptNumber;
 
   private final MergeContext mergeContext;
   private Map<String, String> properties;
@@ -61,7 +60,6 @@ public class RssRegisterShuffleRequest {
         user,
         dataDistributionType,
         maxConcurrencyPerPartitionToWrite,
-        0,
         null,
         Collections.emptyMap());
   }
@@ -74,7 +72,6 @@ public class RssRegisterShuffleRequest {
       String user,
       ShuffleDataDistributionType dataDistributionType,
       int maxConcurrencyPerPartitionToWrite,
-      int stageAttemptNumber,
       MergeContext mergeContext,
       Map<String, String> properties) {
     this.appId = appId;
@@ -84,7 +81,6 @@ public class RssRegisterShuffleRequest {
     this.user = user;
     this.dataDistributionType = dataDistributionType;
     this.maxConcurrencyPerPartitionToWrite = maxConcurrencyPerPartitionToWrite;
-    this.stageAttemptNumber = stageAttemptNumber;
     this.mergeContext = mergeContext;
     this.properties = properties;
   }
@@ -105,7 +101,6 @@ public class RssRegisterShuffleRequest {
         user,
         dataDistributionType,
         RssClientConf.MAX_CONCURRENCY_PER_PARTITION_TO_WRITE.defaultValue(),
-        0,
         null,
         Collections.emptyMap());
   }
@@ -120,7 +115,6 @@ public class RssRegisterShuffleRequest {
         StringUtils.EMPTY,
         ShuffleDataDistributionType.NORMAL,
         RssClientConf.MAX_CONCURRENCY_PER_PARTITION_TO_WRITE.defaultValue(),
-        0,
         null,
         Collections.emptyMap());
   }
@@ -151,10 +145,6 @@ public class RssRegisterShuffleRequest {
 
   public int getMaxConcurrencyPerPartitionToWrite() {
     return maxConcurrencyPerPartitionToWrite;
-  }
-
-  public int getStageAttemptNumber() {
-    return stageAttemptNumber;
   }
 
   public MergeContext getMergeContext() {

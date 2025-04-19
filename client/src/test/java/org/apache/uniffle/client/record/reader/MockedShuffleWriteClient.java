@@ -120,8 +120,6 @@ public class MockedShuffleWriteClient implements ShuffleWriteClient {
       int assignmentShuffleServerNumber,
       int estimateTaskConcurrency,
       Set<String> faultyServerIds,
-      int stageId,
-      int stageAttemptNumber,
       boolean reassign,
       long retryIntervalMs,
       int retryTimes) {
@@ -164,6 +162,7 @@ public class MockedShuffleWriteClient implements ShuffleWriteClient {
       Map<ShuffleServerInfo, Set<Integer>> serverToPartitions,
       String appId,
       int shuffleId,
+      int uniffleShuffleId,
       Set<Integer> failedPartitions,
       PartitionDataReplicaRequirementTracking replicaRequirementTracking) {
     return null;
