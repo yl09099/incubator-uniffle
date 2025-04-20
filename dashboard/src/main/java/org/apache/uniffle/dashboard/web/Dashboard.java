@@ -121,6 +121,7 @@ public class Dashboard {
     ServletHolder servletHolder = contextHandler.addServlet(ServletContainer.class, "/*");
     servletHolder.setInitParameter(
         ServerProperties.PROVIDER_PACKAGES, "org.apache.uniffle.dashboard.web.resource");
+    // Turn off wadl.
     servletHolder.setInitParameter(ServerProperties.WADL_FEATURE_DISABLE, "true");
     contextHandler.setAttribute("coordinatorServerAddresses", coordinatorServerAddresses);
     contextHandler.setAttribute(Dashboard.class.getCanonicalName(), this);

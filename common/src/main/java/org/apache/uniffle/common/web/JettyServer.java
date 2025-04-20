@@ -155,6 +155,7 @@ public class JettyServer {
     resourcePackages.addAll(Arrays.asList(packages));
     servletHolder.setInitParameter(
         ServerProperties.PROVIDER_PACKAGES, String.join(",", resourcePackages));
+    // Turn off wadl.
     servletHolder.setInitParameter(ServerProperties.WADL_FEATURE_DISABLE, "true");
   }
 
