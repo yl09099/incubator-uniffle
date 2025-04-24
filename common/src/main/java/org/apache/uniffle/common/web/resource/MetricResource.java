@@ -38,7 +38,6 @@ public class MetricResource extends BaseMetricResource {
   @Context protected ServletContext servletContext;
 
   @GET
-  @Path("/")
   public MetricsJsonObj metrics(@QueryParam("name[]") Set<String> names) {
     return metrics(null, names);
   }

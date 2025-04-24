@@ -93,6 +93,7 @@ GC_LOG_ARGS_NEW=" -XX:+IgnoreUnrecognizedVMOptions \
           -Xlog:gc+phases=debug \
           -Xlog:gc+ref=debug \
           -Xlog:gc+start=debug \
+          --add-opens java.base/java.lang=ALL-UNNAMED \
           -Xlog:gc*:file=${RSS_LOG_DIR}/gc-%t.log:tags,uptime,time,level"
 
 JVM_LOG_ARGS=""
