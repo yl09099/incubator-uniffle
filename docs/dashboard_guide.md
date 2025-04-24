@@ -35,7 +35,7 @@ coordinator.web.address http://coordinator.hostname:19998/
 ```
 
 ### Configure related JVM parameters
-You can add extra JVM arguments for the Uniffle dashboard by specifying `DASHBOARD_JAVA_OPTS` in `RSS_HOME/bin/rss-env.sh`
+You can add extra JVM arguments for the Uniffle dashboard by specifying `DASHBOARD_JAVA_OPTS` in `RSS_HOME/conf/rss-env.sh`
 Example:
 ```
 DASHBOARD_JAVA_OPTS="-Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=5004 -Drss.jetty.http.port=19997"
