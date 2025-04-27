@@ -19,6 +19,18 @@ version: "3"
 name: rss
 
 services:
+  dashboard:
+    image: rss-server-example:latest
+    deploy:
+      mode: replicated
+      replicas: 1
+    environment:
+      SERVICE_NAME: dashboard
+      RPC_PORT: 19997
+      XMX_SIZE: 1g
+    ports:
+      - "19997:19997"
+
   coordinator:
     image: rss-server-example:latest
     deploy:

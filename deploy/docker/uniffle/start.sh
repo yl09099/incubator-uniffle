@@ -24,6 +24,8 @@ coordinator_conf=$basedir'/conf/coordinator.conf'
 echo "coordinator_conf: $coordinator_conf"
 server_conf=$basedir'/conf/server.conf'
 echo "server_conf: $server_conf"
+dashboard_conf=$basedir'/conf/dashboard.conf'
+echo "dashboard_conf: $dashboard_conf"
 
 if [ "$SERVICE_NAME" == "coordinator" ];then
     start_script=${basedir}'/bin/start-coordinator.sh'
@@ -33,6 +35,11 @@ fi
 if [ "$SERVICE_NAME" == "server" ];then
     start_script=${basedir}'/bin/start-shuffle-server.sh'
     log_file=$basedir'/logs/shuffle_server.log'
+fi
+
+if [ "$SERVICE_NAME" == "dashboard" ];then
+    start_script=${basedir}'/bin/start-dashboard.sh'
+    log_file=$basedir'/logs/dashboard.log'
 fi
 
 touch "${log_file}"

@@ -37,6 +37,10 @@ sed -i -e "s/rss.server.buffer.capacity .*/rss.server.buffer.capacity 200mb/" "$
 sed -i -e "s/rss.server.read.buffer.capacity .*/rss.server.read.buffer.capacity 100mb/" "$EXAMPLE_DIR/uniffle/server.conf"
 sed -i -e "s/rss.server.disk.capacity .*/rss.server.disk.capacity 100m/" "$EXAMPLE_DIR/uniffle/server.conf"
 
+# patch conf/dashboard.conf
+cp "$RSS_DIR/conf/dashboard.conf" "$EXAMPLE_DIR/uniffle/"
+sed -i -e "s%coordinator.web.address .*%coordinator.web.address http://rss-coordinator-1:19998,http://rss-coordinator-2:19998%" "$EXAMPLE_DIR/uniffle/dashboard.conf"
+
 # build RSS example docker image
 docker build -t rss-server-example "$EXAMPLE_DIR/uniffle"
 

@@ -59,7 +59,7 @@ jobs:
 
         # check all rss containers are up
         healthy="$(docker container ls | grep rss-server-example | grep "(healthy)" | wc -l)"
-        if [ "$healthy" == "6" ]
+        if [ "$healthy" == "7" ]
         then
           echo "All RSS containers up"
         else
