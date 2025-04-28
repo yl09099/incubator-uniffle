@@ -23,6 +23,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 
@@ -51,7 +52,7 @@ public class ServerNode implements Comparable<ServerNode> {
   private long startTime = -1;
   private String version;
   private String gitCommitId;
-  Map<String, RssProtos.ApplicationInfo> appIdToInfos;
+  @JsonIgnore Map<String, RssProtos.ApplicationInfo> appIdToInfos;
 
   public ServerNode(String id) {
     this(id, "", 0, 0, 0, 0, 0, Sets.newHashSet(), ServerStatus.EXCLUDED);
