@@ -591,7 +591,6 @@ public class ShuffleWriteClientImpl implements ShuffleWriteClient {
       RemoteStorageInfo remoteStorage,
       ShuffleDataDistributionType dataDistributionType,
       int maxConcurrencyPerPartitionToWrite,
-      int stageAttemptNumber,
       MergeContext mergeContext,
       Map<String, String> properties) {
     String user = null;
@@ -610,7 +609,6 @@ public class ShuffleWriteClientImpl implements ShuffleWriteClient {
             user,
             dataDistributionType,
             maxConcurrencyPerPartitionToWrite,
-            stageAttemptNumber,
             mergeContext,
             properties);
     RssRegisterShuffleResponse response =
@@ -676,9 +674,6 @@ public class ShuffleWriteClientImpl implements ShuffleWriteClient {
       int assignmentShuffleServerNumber,
       int estimateTaskConcurrency,
       Set<String> faultyServerIds,
-      int stageId,
-      int stageAttemptNumber,
-      boolean reassign,
       long retryIntervalMs,
       int retryTimes) {
     RssGetShuffleAssignmentsRequest request =
@@ -692,9 +687,6 @@ public class ShuffleWriteClientImpl implements ShuffleWriteClient {
             assignmentShuffleServerNumber,
             estimateTaskConcurrency,
             faultyServerIds,
-            stageId,
-            stageAttemptNumber,
-            reassign,
             retryIntervalMs,
             retryTimes);
 
