@@ -37,16 +37,6 @@ import org.apache.uniffle.proto.RssProtos.MergeContext;
 
 public interface ShuffleWriteClient {
 
-  default SendShuffleDataResult sendShuffleData(
-      String appId,
-      int stageAttemptNumber,
-      List<ShuffleBlockInfo> shuffleBlockInfoList,
-      Supplier<Boolean> needCancelRequest) {
-    throw new UnsupportedOperationException(
-        this.getClass().getName()
-            + " doesn't implement getShuffleAssignments with faultyServerIds");
-  }
-
   SendShuffleDataResult sendShuffleData(
       String appId,
       List<ShuffleBlockInfo> shuffleBlockInfoList,
@@ -149,15 +139,6 @@ public interface ShuffleWriteClient {
       int shuffleId,
       long taskAttemptId,
       int bitmapNum);
-
-  default void reportShuffleResult(
-      Map<ShuffleServerInfo, Map<Integer, Set<Long>>> serverToPartitionToBlockIds,
-      String appId,
-      int shuffleId,
-      long taskAttemptId,
-      int bitmapNum,
-      Set<ShuffleServerInfo> reportFailureServers,
-      boolean enableWriteFailureRetry) {}
 
   ShuffleAssignmentsInfo getShuffleAssignments(
       String appId,

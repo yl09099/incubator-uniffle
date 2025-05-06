@@ -19,22 +19,39 @@ package org.apache.uniffle.client.request;
 
 import org.apache.uniffle.proto.RssProtos;
 
-public class RssPartitionToShuffleServerRequest {
-  private int shuffleId;
+public class RssAppUniffleShuffleIdRequest {
+  private final int shuffleId;
+  private final int stageAttemptId;
+  private final int stageAttemptNumber;
+  private final boolean isWriter;
 
-  public RssPartitionToShuffleServerRequest(int shuffleId) {
-
+  public RssAppUniffleShuffleIdRequest(
+      int shuffleId, int stageAttemptId, int stageAttemptNumber, boolean isWriter) {
     this.shuffleId = shuffleId;
+    this.stageAttemptId = stageAttemptId;
+    this.stageAttemptNumber = stageAttemptNumber;
+    this.isWriter = isWriter;
   }
 
   public int getShuffleId() {
     return shuffleId;
   }
 
-  public RssProtos.PartitionToShuffleServerRequest toProto() {
-    RssProtos.PartitionToShuffleServerRequest.Builder builder =
-        RssProtos.PartitionToShuffleServerRequest.newBuilder();
-    builder.setShuffleId(shuffleId);
+  public int getStageAttemptNumber() {
+    return stageAttemptNumber;
+  }
+
+  public boolean isWriter() {
+    return isWriter;
+  }
+
+  public RssProtos.AppUniffleShuffleIdRequest toProto() {
+    RssProtos.AppUniffleShuffleIdRequest.Builder builder =
+        RssProtos.AppUniffleShuffleIdRequest.newBuilder()
+            .setShuffleId(shuffleId)
+            .setStageAttemptId(stageAttemptId)
+            .setStageAttemptNumber(stageAttemptNumber)
+            .setIsWriter(isWriter);
     return builder.build();
   }
 }

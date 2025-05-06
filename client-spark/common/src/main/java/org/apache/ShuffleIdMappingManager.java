@@ -55,6 +55,20 @@ public class ShuffleIdMappingManager {
   }
 
   /**
+   * Record the Determinate status of each shuffle.
+   *
+   * @param shuffleId
+   * @param isDeterminate
+   */
+  public void recordShuffleIdDeterminate(int shuffleId, boolean isDeterminate) {
+    shuffleDeterminateMap.put(shuffleId, isDeterminate);
+  }
+
+  public boolean getShuffleIdDeterminate(int shuffleId) {
+    return shuffleDeterminateMap.get(shuffleId);
+  }
+
+  /**
    * Create the shuffleId of uniffle based on the ShuffleID of Spark. When registerShuffle is being
    * performed, the default number of attempts by our stage is 0.
    *
@@ -74,7 +88,48 @@ public class ShuffleIdMappingManager {
         .get(0);
   }
 
-  public void recordShuffleIdDeterminate(int shuffleId, boolean isDeterminate) {
-    shuffleDeterminateMap.put(shuffleId, isDeterminate);
+  /**
+   * A new shuffleId is generated based on the shuffleId of Spark and the stage Attempt number of
+   * Spark, and it is generally called only when the stage retry is triggered.
+   *
+   * @param shuffleId
+   * @param stageAttemptNumber
+   * @return
+   */
+  public int createUniffleShuffleId(int shuffleId, int stageAttemptNumber) {
+    int generatorShuffleId = shuffleIdGenerator.incrementAndGet();
+    shuffleIdMapping.get(shuffleId).put(stageAttemptNumber, generatorShuffleId);
+    return generatorShuffleId;
+  }
+
+  /**
+   * Determine whether there is a record based on the passed-in Spark shuffleId and the number of
+   * Spark Stage attempts.
+   *
+   * @param shuffleId
+   * @param stageAttemptNumber
+   * @return
+   */
+  public boolean hasUniffleShuffleIdByStageNumber(int shuffleId, int stageAttemptNumber) {
+    return shuffleIdMapping.get(shuffleId).get(stageAttemptNumber) != null;
+  }
+
+  public int getUniffleShuffleIdByStageNumber(int shuffleId, int stageAttemptNumber) {
+    return shuffleIdMapping.get(shuffleId).get(stageAttemptNumber);
+  }
+
+  /**
+   * Based on the passed-in Spark shuffleId, obtain all the stage attemptNumber. Sort in reverse
+   * according to the stage attemptNumber to obtain the current Uniffle shuffleId
+   *
+   * @param shuffleId
+   * @return
+   */
+  public int getUniffleShuffleIdByMaxStageNumber(int shuffleId) {
+    return shuffleIdMapping.get(shuffleId).entrySet().stream()
+        .sorted(Map.Entry.<Integer, Integer>comparingByKey().reversed())
+        .findFirst()
+        .get()
+        .getValue();
   }
 }

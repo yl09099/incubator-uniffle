@@ -54,7 +54,7 @@ import org.apache.uniffle.common.exception.RssException;
 import org.apache.uniffle.common.exception.RssFetchFailedException;
 import org.apache.uniffle.common.util.Constants;
 
-import static org.apache.spark.shuffle.RssSparkConfig.RSS_RESUBMIT_STAGE_WITH_FETCH_FAILURE_ENABLED;
+import static org.apache.spark.shuffle.RssSparkConfig.RSS_RESUBMIT_STAGE_ENABLED;
 
 public class RssSparkShuffleUtils {
 
@@ -366,17 +366,21 @@ public class RssSparkShuffleUtils {
       SparkConf sparkConf,
       String appId,
       int shuffleId,
+      int uniffleShuffleId,
       int stageAttemptId,
+      int stageAttemptNumber,
       Set<Integer> failedPartitions) {
     RssConf rssConf = RssSparkConfig.toRssConf(sparkConf);
-    if (rssConf.getBoolean(RSS_RESUBMIT_STAGE_WITH_FETCH_FAILURE_ENABLED)
+    if (rssConf.getBoolean(RSS_RESUBMIT_STAGE_ENABLED)
         && RssSparkShuffleUtils.isStageResubmitSupported()) {
       for (int partitionId : failedPartitions) {
         RssReportShuffleFetchFailureRequest req =
             new RssReportShuffleFetchFailureRequest(
                 appId,
                 shuffleId,
+                uniffleShuffleId,
                 stageAttemptId,
+                stageAttemptNumber,
                 partitionId,
                 rssFetchFailedException.getMessage());
         RssReportShuffleFetchFailureResponse response =

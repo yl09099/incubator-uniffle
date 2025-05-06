@@ -167,6 +167,9 @@ public abstract class SparkIntegrationTestBase extends IntegrationTestBase {
         RssSparkConfig.SPARK_RSS_CONFIG_PREFIX
             + RssSparkConfig.RSS_BLOCK_ID_SELF_MANAGEMENT_ENABLED.key(),
         "true");
+    sparkConf.set(
+        RssSparkConfig.SPARK_RSS_CONFIG_PREFIX + RssSparkConfig.RSS_RESUBMIT_STAGE_ENABLED.key(),
+        "true");
   }
 
   protected void verifyTestResult(Map expected, Map actual) {

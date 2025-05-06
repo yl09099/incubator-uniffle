@@ -327,7 +327,6 @@ public class ShuffleServerGrpcService extends ShuffleServerImplBase {
       int shuffleId = req.getShuffleId();
       long requireBufferId = req.getRequireBufferId();
       long timestamp = req.getTimestamp();
-      int stageAttemptNumber = req.getStageAttemptNumber();
 
       auditContext.withAppId(appId).withShuffleId(shuffleId);
       auditContext.withArgs(
@@ -335,8 +334,6 @@ public class ShuffleServerGrpcService extends ShuffleServerImplBase {
               + requireBufferId
               + ", timestamp="
               + timestamp
-              + ", stageAttemptNumber="
-              + stageAttemptNumber
               + ", shuffleDataSize="
               + req.getShuffleDataCount());
 
@@ -356,21 +353,6 @@ public class ShuffleServerGrpcService extends ShuffleServerImplBase {
             SendShuffleDataResponse.newBuilder()
                 .setStatus(StatusCode.APP_NOT_FOUND.toProto())
                 .setRetMsg(errorMsg)
-                .build();
-        auditContext.withStatusCode(StatusCode.fromProto(reply.getStatus()));
-        responseObserver.onNext(reply);
-        responseObserver.onCompleted();
-        return;
-      }
-      Integer latestStageAttemptNumber = taskInfo.getLatestStageAttemptNumber(shuffleId);
-      // The Stage retry occurred, and the task before StageNumber was simply ignored and not
-      // processed if the task was being sent.
-      if (stageAttemptNumber < latestStageAttemptNumber) {
-        String responseMessage = "A retry has occurred at the Stage, sending data is invalid.";
-        reply =
-            SendShuffleDataResponse.newBuilder()
-                .setStatus(StatusCode.STAGE_RETRY_IGNORE.toProto())
-                .setRetMsg(responseMessage)
                 .build();
         auditContext.withStatusCode(StatusCode.fromProto(reply.getStatus()));
         responseObserver.onNext(reply);

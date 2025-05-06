@@ -538,7 +538,6 @@ public class ShuffleServerGrpcClient extends GrpcClient implements ShuffleServer
     String appId = request.getAppId();
     Map<Integer, Map<Integer, List<ShuffleBlockInfo>>> shuffleIdToBlocks =
         request.getShuffleIdToBlocks();
-    int stageAttemptNumber = request.getStageAttemptNumber();
 
     boolean isSuccessful = true;
     AtomicReference<StatusCode> failedStatusCode = new AtomicReference<>(StatusCode.INTERNAL_ERROR);
@@ -611,7 +610,6 @@ public class ShuffleServerGrpcClient extends GrpcClient implements ShuffleServer
                       .setRequireBufferId(requireId)
                       .addAllShuffleData(shuffleData)
                       .setTimestamp(start)
-                      .setStageAttemptNumber(stageAttemptNumber)
                       .build();
               SendShuffleDataResponse response = getBlockingStub().sendShuffleData(rpcRequest);
               if (LOG.isDebugEnabled()) {
