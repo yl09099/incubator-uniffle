@@ -668,7 +668,7 @@ public class RssShuffleManager extends RssShuffleManagerBase {
           clientType,
           serverToPartitions,
           appId,
-          shuffleId,
+          uniffleShuffleId,
           failedPartitions,
           replicaRequirementTracking);
     } catch (RssFetchFailedException e) {

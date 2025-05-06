@@ -99,21 +99,19 @@ public class ShuffleManagerGrpcService extends ShuffleManagerImplBase {
           if (status.currentPartitionIsFetchFailed(
               stageAttemptNumber, partitionId, shuffleManager)) {
             reSubmitWholeStage = true;
-            if (!status.hasClearedMapTrackerBlock()) {
+            if (!status.isAlreadyReStage()) {
               try {
                 // Clear the metadata of the completed task, after the upstream ShuffleId is
                 // cleared, the write Stage can be triggered again.
                 shuffleManager.unregisterAllMapOutput(shuffleId);
-                status.clearedMapTrackerBlock();
-                LOG.info(
-                    "Clear shuffle result in shuffleId:{}, uniffleShuffleId:{}, stageId:{}, stageAttemptNumber:{} in the write failure phase.",
-                    shuffleId,
-                    uniffleShuffleId,
-                    stageAttemptId,
-                    stageAttemptNumber);
+                // Reassign ShuffleServer.
+                shuffleManager.reassignOnStageResubmit(
+                    shuffleId, uniffleShuffleId, stageAttemptId, stageAttemptNumber);
+                status.setAlreadyReStage();
               } catch (SparkException e) {
                 LOG.error(
-                    "Clear MapoutTracker Meta failed in shuffleId:{}, uniffleShuffleId:{}, stageId:{}, stageAttemptNumber:{} in the write failure phase.",
+                    "Clear MapoutTracker Meta failed in shuffleId:{}, uniffleShuffleId:{}, stageId:{},"
+                        + " stageAttemptNumber:{} in the write failure phase.",
                     shuffleId,
                     uniffleShuffleId,
                     stageAttemptId,
@@ -205,12 +203,12 @@ public class ShuffleManagerGrpcService extends ShuffleManagerImplBase {
     private final int[] partitions;
     private int stageAttempt;
     // Whether the Shuffle result has been cleared for the current number of attempts.
-    private boolean hasClearedMapTrackerBlock;
+    private boolean alreadyReStage;
 
     private RssShuffleStatus(int partitionNum, int stageAttempt) {
       this.stageAttempt = stageAttempt;
       this.partitions = new int[partitionNum];
-      this.hasClearedMapTrackerBlock = false;
+      this.alreadyReStage = false;
     }
 
     private <T> T withReadLock(Supplier<T> fn) {
@@ -283,18 +281,18 @@ public class ShuffleManagerGrpcService extends ShuffleManagerImplBase {
           });
     }
 
-    public void clearedMapTrackerBlock() {
+    public void setAlreadyReStage() {
       withWriteLock(
           () -> {
-            this.hasClearedMapTrackerBlock = true;
+            this.alreadyReStage = true;
             return null;
           });
     }
 
-    public boolean hasClearedMapTrackerBlock() {
+    public boolean isAlreadyReStage() {
       return withReadLock(
           () -> {
-            return hasClearedMapTrackerBlock;
+            return alreadyReStage;
           });
     }
   }

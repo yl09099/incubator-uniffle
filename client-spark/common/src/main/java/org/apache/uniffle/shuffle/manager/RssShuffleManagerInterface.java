@@ -24,7 +24,6 @@ import org.apache.spark.SparkException;
 import org.apache.spark.shuffle.handle.MutableShuffleHandleInfo;
 import org.apache.spark.shuffle.handle.ShuffleHandleInfo;
 
-import org.apache.uniffle.client.api.ShuffleWriteClient;
 import org.apache.uniffle.common.ReceivingFailureServer;
 import org.apache.uniffle.shuffle.BlockIdManager;
 
@@ -81,19 +80,15 @@ public interface RssShuffleManagerInterface {
    */
   void addFailuresShuffleServerInfos(String shuffleServerId);
 
+  void reassignOnStageResubmit(
+      int shuffleId, int uniffleShuffleId, int stageAttemptId, int stageAttemptNumber);
+
   MutableShuffleHandleInfo reassignOnBlockSendFailure(
       int stageId,
       int stageAttemptNumber,
       int shuffleId,
       Map<Integer, List<ReceivingFailureServer>> partitionToFailureServers,
       boolean partitionSplit);
-
-  /**
-   * Driver Obtains ShuffleWriteClient.
-   *
-   * @return
-   */
-  ShuffleWriteClient getShuffleWriteClient();
 
   int getUniffleShuffleId(
       int shuffleId, int stageAttemptId, int stageAttemptNumber, boolean isWriter);

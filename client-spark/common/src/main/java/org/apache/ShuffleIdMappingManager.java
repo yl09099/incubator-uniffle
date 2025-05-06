@@ -132,4 +132,14 @@ public class ShuffleIdMappingManager {
         .get()
         .getValue();
   }
+
+  public int getMaxStageNumberByShuffleId(int shuffleId) {
+    // Get the number of retries of the current latest Stage, increment it, and create a new
+    // ShuffleID.
+    return shuffleIdMapping.get(shuffleId).entrySet().stream()
+        .sorted(Map.Entry.<Integer, Integer>comparingByKey().reversed())
+        .findFirst()
+        .get()
+        .getValue();
+  }
 }

@@ -955,6 +955,43 @@ public abstract class RssShuffleManagerBase implements RssShuffleManagerInterfac
     rssStageResubmitManager.recordFailuresShuffleServer(shuffleServerId);
   }
 
+  /**
+   * Reassign the ShuffleServer list for ShuffleId
+   *
+   * @param shuffleId
+   */
+  @Override
+  public void reassignOnStageResubmit(
+      int shuffleId, int uniffleShuffleId, int stageAttemptId, int stageAttemptNumber) {
+    int requiredShuffleServerNumber =
+        RssSparkShuffleUtils.getRequiredShuffleServerNumber(sparkConf);
+    int estimateTaskConcurrency = RssSparkShuffleUtils.estimateTaskConcurrency(sparkConf);
+    int generatorStageAttemptNumber =
+        shuffleIdMappingManager.getMaxStageNumberByShuffleId(shuffleId) + 1;
+    int newShuffleId =
+        shuffleIdMappingManager.createUniffleShuffleId(shuffleId, generatorStageAttemptNumber);
+    Map<Integer, List<ShuffleServerInfo>> replaceShuffleServers =
+        requestShuffleAssignment(
+            newShuffleId,
+            shuffleIdToPartitionNum.get(shuffleId),
+            1,
+            requiredShuffleServerNumber,
+            estimateTaskConcurrency,
+            rssStageResubmitManager.getServerIdBlackList());
+    MutableShuffleHandleInfo mutableShuffleHandleInfo =
+        new MutableShuffleHandleInfo(newShuffleId, replaceShuffleServers, getRemoteStorageInfo());
+    shuffleHandleInfoManager.register(newShuffleId, mutableShuffleHandleInfo);
+    LOG.info(
+        "The Stage id is {}, the number of retries is {}, and the number of generated retries "
+            + "is {}，Retry occurred in shuffleId[{}] and a new shuffleId[{}] was generated, the old shuffleId [{}] that was logged out",
+        stageAttemptId,
+        stageAttemptNumber,
+        generatorStageAttemptNumber,
+        shuffleId,
+        newShuffleId,
+        uniffleShuffleId);
+  }
+
   /** this is only valid on driver side that exposed to being invoked by grpc server */
   @Override
   public MutableShuffleHandleInfo reassignOnBlockSendFailure(

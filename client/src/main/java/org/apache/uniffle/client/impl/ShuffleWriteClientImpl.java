@@ -867,14 +867,11 @@ public class ShuffleWriteClientImpl implements ShuffleWriteClient {
       } catch (Exception e) {
         failedPartitions.addAll(requestPartitions);
         LOG.warn(
-            "Get shuffle result is failed from "
-                + shuffleServerInfo
-                + " for appId["
-                + appId
-                + "], shuffleId["
-                + shuffleId
-                + "], requestPartitions"
-                + requestPartitions,
+            "Get shuffle result is failed from {} for appId[{}], shuffleId[{}], requestPartitions {}",
+            shuffleServerInfo,
+            appId,
+            shuffleId,
+            requestPartitions,
             e);
       }
     }

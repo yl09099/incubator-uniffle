@@ -25,7 +25,6 @@ import java.util.Set;
 import org.apache.spark.shuffle.handle.MutableShuffleHandleInfo;
 import org.apache.spark.shuffle.handle.ShuffleHandleInfo;
 
-import org.apache.uniffle.client.api.ShuffleWriteClient;
 import org.apache.uniffle.common.ReceivingFailureServer;
 import org.apache.uniffle.shuffle.BlockIdManager;
 
@@ -71,17 +70,16 @@ public class DummyRssShuffleManager implements RssShuffleManagerInterface {
   public void addFailuresShuffleServerInfos(String shuffleServerId) {}
 
   @Override
+  public void reassignOnStageResubmit(
+      int shuffleId, int uniffleShuffleId, int stageAttemptId, int stageAttemptNumber) {}
+
+  @Override
   public MutableShuffleHandleInfo reassignOnBlockSendFailure(
       int stageId,
       int stageAttemptNumber,
       int shuffleId,
       Map<Integer, List<ReceivingFailureServer>> partitionToFailureServers,
       boolean partitionSplit) {
-    return null;
-  }
-
-  @Override
-  public ShuffleWriteClient getShuffleWriteClient() {
     return null;
   }
 
