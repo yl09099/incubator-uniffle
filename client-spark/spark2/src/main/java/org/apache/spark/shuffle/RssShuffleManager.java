@@ -36,6 +36,7 @@ import org.apache.spark.SparkEnv;
 import org.apache.spark.TaskContext;
 import org.apache.spark.broadcast.Broadcast;
 import org.apache.spark.executor.ShuffleWriteMetrics;
+import org.apache.spark.rdd.DeterministicLevel;
 import org.apache.spark.shuffle.handle.MutableShuffleHandleInfo;
 import org.apache.spark.shuffle.handle.ShuffleHandleInfo;
 import org.apache.spark.shuffle.handle.SimpleShuffleHandleInfo;
@@ -113,6 +114,13 @@ public class RssShuffleManager extends RssShuffleManagerBase {
       LOG.info("Generate application id used in rss: " + appId);
     }
 
+    // If stage retry is enabled, the Deterministic status of the ShuffleId needs to be recorded.
+    if (rssStageRetryEnabled) {
+      shuffleIdMappingManager.recordShuffleIdDeterminate(
+          shuffleId,
+          dependency.rdd().getOutputDeterministicLevel() != DeterministicLevel.INDETERMINATE());
+    }
+
     if (dependency.partitioner().numPartitions() == 0) {
       shuffleIdToPartitionNum.putIfAbsent(shuffleId, 0);
       shuffleIdToNumMapTasks.computeIfAbsent(
@@ -147,15 +155,22 @@ public class RssShuffleManager extends RssShuffleManagerBase {
         RssSparkShuffleUtils.getRequiredShuffleServerNumber(sparkConf);
     int estimateTaskConcurrency = RssSparkShuffleUtils.estimateTaskConcurrency(sparkConf);
 
+    // If the stage retry parameter is enabled, you need to generate a new ShuffleID.
+    Integer uniffleShuffleId;
+    if (rssStageRetryEnabled) {
+      uniffleShuffleId = shuffleIdMappingManager.createUniffleShuffleId(shuffleId);
+    } else {
+      uniffleShuffleId = shuffleId;
+    }
+
     Map<Integer, List<ShuffleServerInfo>> partitionToServers =
         requestShuffleAssignment(
-            shuffleId,
+            uniffleShuffleId,
             dependency.partitioner().numPartitions(),
             1,
             requiredShuffleServerNumber,
             estimateTaskConcurrency,
-            rssStageResubmitManager.getServerIdBlackList(),
-            0);
+            rssStageResubmitManager.getServerIdBlackList());
 
     startHeartbeat();
 
@@ -385,7 +400,7 @@ public class RssShuffleManager extends RssShuffleManagerBase {
     Set<String> faultyServerIds = Sets.newHashSet(faultyShuffleServerId);
     faultyServerIds.addAll(rssStageResubmitManager.getServerIdBlackList());
     Map<Integer, List<ShuffleServerInfo>> partitionToServers =
-        requestShuffleAssignment(shuffleId, 1, 1, 1, 1, faultyServerIds, 0);
+        requestShuffleAssignment(shuffleId, 1, 1, 1, 1, faultyServerIds);
     if (partitionToServers.get(0) != null && partitionToServers.get(0).size() == 1) {
       return partitionToServers.get(0).get(0);
     }
