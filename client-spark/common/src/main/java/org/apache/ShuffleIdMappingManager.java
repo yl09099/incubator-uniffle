@@ -22,6 +22,24 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.uniffle.common.util.JavaUtils;
 
+/**
+ * We establish a Spark shuffleId and a stage attempt number, and the correspondence between them
+ * and the Uniffle shuffleId. The Uniffle shuffleId is incrementing forever. For example:
+ *
+ * <p>| spark shuffleId | stage attemptnumber | uniffle shuffleId |
+ *
+ * <p>| 0 | 0 | 0 |
+ *
+ * <p>| 0 | 1 | 1 |
+ *
+ * <p>| 0 | 2 | 2 |
+ *
+ * <p>| 0 | 3 | 3 |
+ *
+ * <p>| 1 | 0 | 4 |
+ *
+ * <p>...
+ */
 public class ShuffleIdMappingManager {
   // Generate a new ShuffleID.
   private AtomicInteger shuffleIdGenerator;
@@ -37,12 +55,13 @@ public class ShuffleIdMappingManager {
   }
 
   /**
-   * Create the shuffleId of uniffle based on the ShuffleID of Spark.
+   * Create the shuffleId of uniffle based on the ShuffleID of Spark. When registerShuffle is being
+   * performed, the default number of attempts by our stage is 0.
    *
    * @param shuffleId
    * @return
    */
-  public int getOrCreateUniffleShuffleId(int shuffleId) {
+  public int createUniffleShuffleId(int shuffleId) {
     return shuffleIdMapping
         .computeIfAbsent(
             shuffleId,

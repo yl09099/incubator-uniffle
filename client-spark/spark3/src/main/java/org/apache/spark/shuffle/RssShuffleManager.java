@@ -178,7 +178,7 @@ public class RssShuffleManager extends RssShuffleManagerBase {
     // If the stage retry parameter is enabled, you need to generate a new ShuffleID.
     Integer uniffleShuffleId;
     if (rssStageRetryEnabled) {
-      uniffleShuffleId = shuffleIdMappingManager.getOrCreateUniffleShuffleId(shuffleId);
+      uniffleShuffleId = shuffleIdMappingManager.createUniffleShuffleId(shuffleId);
     } else {
       uniffleShuffleId = shuffleId;
     }

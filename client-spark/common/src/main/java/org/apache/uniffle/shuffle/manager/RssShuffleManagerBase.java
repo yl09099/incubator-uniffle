@@ -154,7 +154,6 @@ public abstract class RssShuffleManagerBase implements RssShuffleManagerInterfac
   protected ShuffleHandleInfoManager shuffleHandleInfoManager;
 
   protected RssStageResubmitManager rssStageResubmitManager;
-
   protected ShuffleIdMappingManager shuffleIdMappingManager;
   protected int partitionReassignMaxServerNum;
   protected boolean blockIdSelfManagedEnabled;
