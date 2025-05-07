@@ -126,10 +126,9 @@ public class RssShuffleManager extends RssShuffleManagerBase {
       shuffleIdToNumMapTasks.computeIfAbsent(
           shuffleId, key -> dependency.rdd().partitions().length);
       LOG.info(
-          "RegisterShuffle with ShuffleId["
-              + shuffleId
-              + "], partitionNum is 0, "
-              + "return the empty RssShuffleHandle directly");
+          "RegisterShuffle with ShuffleId[{}], partitionNum is 0, "
+              + "return the empty RssShuffleHandle directly",
+          shuffleId);
       Broadcast<SimpleShuffleHandleInfo> hdlInfoBd =
           RssSparkShuffleUtils.broadcastShuffleHdlInfo(
               RssSparkShuffleUtils.getActiveSparkContext(),
@@ -155,17 +154,9 @@ public class RssShuffleManager extends RssShuffleManagerBase {
         RssSparkShuffleUtils.getRequiredShuffleServerNumber(sparkConf);
     int estimateTaskConcurrency = RssSparkShuffleUtils.estimateTaskConcurrency(sparkConf);
 
-    // If the stage retry parameter is enabled, you need to generate a new ShuffleID.
-    Integer uniffleShuffleId;
-    if (rssStageRetryEnabled) {
-      uniffleShuffleId = shuffleIdMappingManager.createUniffleShuffleId(shuffleId);
-    } else {
-      uniffleShuffleId = shuffleId;
-    }
-
     Map<Integer, List<ShuffleServerInfo>> partitionToServers =
         requestShuffleAssignment(
-            uniffleShuffleId,
+            shuffleId,
             dependency.partitioner().numPartitions(),
             1,
             requiredShuffleServerNumber,

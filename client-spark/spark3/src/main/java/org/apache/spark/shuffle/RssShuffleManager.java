@@ -147,10 +147,9 @@ public class RssShuffleManager extends RssShuffleManagerBase {
       shuffleIdToNumMapTasks.computeIfAbsent(
           shuffleId, key -> dependency.rdd().partitions().length);
       LOG.info(
-          "RegisterShuffle with ShuffleId["
-              + shuffleId
-              + "], partitionNum is 0, "
-              + "return the empty RssShuffleHandle directly");
+          "RegisterShuffle with ShuffleId[{}], partitionNum is 0, "
+              + "return the empty RssShuffleHandle directly",
+          shuffleId);
       Broadcast<SimpleShuffleHandleInfo> hdlInfoBd =
           RssSparkShuffleUtils.broadcastShuffleHdlInfo(
               RssSparkShuffleUtils.getActiveSparkContext(),
@@ -175,17 +174,9 @@ public class RssShuffleManager extends RssShuffleManagerBase {
         RssSparkShuffleUtils.getRequiredShuffleServerNumber(sparkConf);
     int estimateTaskConcurrency = RssSparkShuffleUtils.estimateTaskConcurrency(sparkConf);
 
-    // If the stage retry parameter is enabled, you need to generate a new ShuffleID.
-    Integer uniffleShuffleId;
-    if (rssStageRetryEnabled) {
-      uniffleShuffleId = shuffleIdMappingManager.createUniffleShuffleId(shuffleId);
-    } else {
-      uniffleShuffleId = shuffleId;
-    }
-
     Map<Integer, List<ShuffleServerInfo>> partitionToServers =
         requestShuffleAssignment(
-            uniffleShuffleId,
+            shuffleId,
             dependency.partitioner().numPartitions(),
             1,
             requiredShuffleServerNumber,
@@ -198,26 +189,26 @@ public class RssShuffleManager extends RssShuffleManagerBase {
     if (shuffleManagerRpcServiceEnabled && rssStageRetryForWriteFailureEnabled) {
       ShuffleHandleInfo shuffleHandleInfo =
           new MutableShuffleHandleInfo(
-              uniffleShuffleId, partitionToServers, remoteStorage, partitionSplitMode);
+              shuffleId, partitionToServers, remoteStorage, partitionSplitMode);
       StageAttemptShuffleHandleInfo handleInfo =
-          new StageAttemptShuffleHandleInfo(uniffleShuffleId, remoteStorage, shuffleHandleInfo);
-      shuffleHandleInfoManager.register(uniffleShuffleId, handleInfo);
+          new StageAttemptShuffleHandleInfo(shuffleId, remoteStorage, shuffleHandleInfo);
+      shuffleHandleInfoManager.register(shuffleId, handleInfo);
     } else if (shuffleManagerRpcServiceEnabled && partitionReassignEnabled) {
       ShuffleHandleInfo shuffleHandleInfo =
           new MutableShuffleHandleInfo(
-              uniffleShuffleId, partitionToServers, remoteStorage, partitionSplitMode);
-      shuffleHandleInfoManager.register(uniffleShuffleId, shuffleHandleInfo);
+              shuffleId, partitionToServers, remoteStorage, partitionSplitMode);
+      shuffleHandleInfoManager.register(shuffleId, shuffleHandleInfo);
     }
     Broadcast<SimpleShuffleHandleInfo> hdlInfoBd =
         RssSparkShuffleUtils.broadcastShuffleHdlInfo(
             RssSparkShuffleUtils.getActiveSparkContext(),
-            uniffleShuffleId,
+            shuffleId,
             partitionToServers,
             remoteStorage);
     LOG.info(
         "RegisterShuffle with ShuffleId[{}], uniffleShuffleId[{}], partitionNum[{}], shuffleServerForResult: {}",
         shuffleId,
-        uniffleShuffleId,
+        shuffleId,
         partitionToServers.size(),
         partitionToServers);
 
