@@ -17,6 +17,7 @@
 
 package org.apache.uniffle.shuffle;
 
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -59,7 +60,8 @@ public class ShuffleIdMappingManager {
   }
 
   /**
-   * Create the shuffleId of uniffle based on the ShuffleID of Spark.
+   * Create the shuffleId of uniffle based on the ShuffleID of Spark. When registerShuffle is being
+   * performed, the default number of attempts by our stage is 0.
    *
    * @param shuffleId
    * @return
@@ -70,6 +72,7 @@ public class ShuffleIdMappingManager {
       appShuffleIdentifier2NewShuffleIdMap = JavaUtils.newConcurrentMap();
       appShuffleIdentifier2NewShuffleIdMap.computeIfAbsent(
           appShuffleIdentifier, k -> shuffleIdGenerator.incrementAndGet());
+      shuffleIdMapping.put(shuffleId, appShuffleIdentifier2NewShuffleIdMap);
       return appShuffleIdentifier2NewShuffleIdMap.get(appShuffleIdentifier);
     } else {
       return appShuffleIdentifier2NewShuffleIdMap.computeIfAbsent(
@@ -77,13 +80,6 @@ public class ShuffleIdMappingManager {
     }
   }
 
-  /**
-   * Whether it has a uniffle shuffleId with a unique appShuffleIdentifier.
-   *
-   * @param shuffleId
-   * @param appShuffleIdentifier
-   * @return
-   */
   public boolean hasUniffleShuffleId(int shuffleId, String appShuffleIdentifier) {
     if (shuffleIdMapping.isEmpty()
         || shuffleIdMapping.get(shuffleId) == null
@@ -93,24 +89,14 @@ public class ShuffleIdMappingManager {
     return true;
   }
 
-  /**
-   * Obtain the uniffle shuffleId based on the appShuffleIdentifier.
-   *
-   * @param shuffleId
-   * @param appShuffleIdentifier
-   * @return
-   */
   public int getUniffleShuffleId(int shuffleId, String appShuffleIdentifier) {
     return shuffleIdMapping.get(shuffleId).get(appShuffleIdentifier);
   }
 
-  /**
-   * During the Shuffle Read stage, it is only necessary to obtain the maximum Uniffle ShuffleId.
-   *
-   * @param shuffleId
-   * @return
-   */
   public int getUniffleShuffleIdForRead(int shuffleId) {
+    Map<String, Integer> stringIntegerMap = shuffleIdMapping.get(shuffleId);
+    Collection<Integer> values = stringIntegerMap.values();
+    values.stream().findFirst().get();
     return shuffleIdMapping.get(shuffleId).values().stream()
         .sorted(Comparator.reverseOrder())
         .findFirst()
@@ -122,6 +108,6 @@ public class ShuffleIdMappingManager {
   }
 
   public boolean getShuffleIdDeterminate(int shuffleId) {
-    return shuffleDeterminateMap.get(shuffleId);
+    return shuffleDeterminateMap.get(shuffleId) && (shuffleIdMapping.get(shuffleId) != null);
   }
 }
