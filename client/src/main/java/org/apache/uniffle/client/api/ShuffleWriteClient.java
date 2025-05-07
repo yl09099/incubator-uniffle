@@ -72,7 +72,6 @@ public interface ShuffleWriteClient {
         remoteStorage,
         dataDistributionType,
         maxConcurrencyPerPartitionToWrite,
-        0,
         null,
         Collections.emptyMap());
   }
@@ -94,7 +93,6 @@ public interface ShuffleWriteClient {
         remoteStorage,
         dataDistributionType,
         maxConcurrencyPerPartitionToWrite,
-        0,
         null,
         properties);
   }
@@ -107,7 +105,6 @@ public interface ShuffleWriteClient {
       RemoteStorageInfo remoteStorage,
       ShuffleDataDistributionType dataDistributionType,
       int maxConcurrencyPerPartitionToWrite,
-      int stageAttemptNumber,
       MergeContext mergeContext) {
     registerShuffle(
         shuffleServerInfo,
@@ -117,7 +114,6 @@ public interface ShuffleWriteClient {
         remoteStorage,
         dataDistributionType,
         maxConcurrencyPerPartitionToWrite,
-        stageAttemptNumber,
         mergeContext,
         Collections.emptyMap());
   }
@@ -130,7 +126,6 @@ public interface ShuffleWriteClient {
       RemoteStorageInfo remoteStorage,
       ShuffleDataDistributionType dataDistributionType,
       int maxConcurrencyPerPartitionToWrite,
-      int stageAttemptNumber,
       MergeContext mergeContext,
       Map<String, String> properties);
 
@@ -173,9 +168,6 @@ public interface ShuffleWriteClient {
       int assignmentShuffleServerNumber,
       int estimateTaskConcurrency,
       Set<String> faultyServerIds,
-      int stageId,
-      int stageAttemptNumber,
-      boolean reassign,
       long retryIntervalMs,
       int retryTimes);
 
@@ -197,9 +189,6 @@ public interface ShuffleWriteClient {
         assignmentShuffleServerNumber,
         estimateTaskConcurrency,
         faultyServerIds,
-        -1,
-        0,
-        false,
         0,
         0);
   }

@@ -42,6 +42,7 @@ import org.apache.spark.TaskContext;
 import org.apache.spark.broadcast.Broadcast;
 import org.apache.spark.executor.ShuffleReadMetrics;
 import org.apache.spark.executor.ShuffleWriteMetrics;
+import org.apache.spark.rdd.DeterministicLevel;
 import org.apache.spark.shuffle.events.ShuffleAssignmentInfoEvent;
 import org.apache.spark.shuffle.handle.MutableShuffleHandleInfo;
 import org.apache.spark.shuffle.handle.ShuffleHandleInfo;
@@ -134,16 +135,21 @@ public class RssShuffleManager extends RssShuffleManagerBase {
       dataPusher.setRssAppId(id.get());
     }
     LOG.info("Generate application id used in rss: " + id.get());
+    // If stage retry is enabled, the Deterministic status of the ShuffleId needs to be recorded.
+    if (rssStageRetryEnabled) {
+      shuffleIdMappingManager.recordShuffleIdDeterminate(
+          shuffleId,
+          dependency.rdd().getOutputDeterministicLevel() != DeterministicLevel.INDETERMINATE());
+    }
 
     if (dependency.partitioner().numPartitions() == 0) {
       shuffleIdToPartitionNum.putIfAbsent(shuffleId, 0);
       shuffleIdToNumMapTasks.computeIfAbsent(
           shuffleId, key -> dependency.rdd().partitions().length);
       LOG.info(
-          "RegisterShuffle with ShuffleId["
-              + shuffleId
-              + "], partitionNum is 0, "
-              + "return the empty RssShuffleHandle directly");
+          "RegisterShuffle with ShuffleId[{}], partitionNum is 0, "
+              + "return the empty RssShuffleHandle directly",
+          shuffleId);
       Broadcast<SimpleShuffleHandleInfo> hdlInfoBd =
           RssSparkShuffleUtils.broadcastShuffleHdlInfo(
               RssSparkShuffleUtils.getActiveSparkContext(),
@@ -175,8 +181,7 @@ public class RssShuffleManager extends RssShuffleManagerBase {
             1,
             requiredShuffleServerNumber,
             estimateTaskConcurrency,
-            rssStageResubmitManager.getServerIdBlackList(),
-            0);
+            rssStageResubmitManager.getServerIdBlackList());
     startHeartbeat();
     shuffleIdToPartitionNum.computeIfAbsent(
         shuffleId, key -> dependency.partitioner().numPartitions());
@@ -201,12 +206,11 @@ public class RssShuffleManager extends RssShuffleManagerBase {
             partitionToServers,
             remoteStorage);
     LOG.info(
-        "RegisterShuffle with ShuffleId["
-            + shuffleId
-            + "], partitionNum["
-            + partitionToServers.size()
-            + "], shuffleServerForResult: "
-            + partitionToServers);
+        "RegisterShuffle with ShuffleId[{}], uniffleShuffleId[{}], partitionNum[{}], shuffleServerForResult: {}",
+        shuffleId,
+        shuffleId,
+        partitionToServers.size(),
+        partitionToServers);
 
     // Post assignment event
     RssSparkShuffleUtils.getActiveSparkContext()
