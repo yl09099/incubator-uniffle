@@ -62,6 +62,7 @@ public class ShuffleIdMappingManager {
    * Create the shuffleId of uniffle based on the ShuffleID of Spark.
    *
    * @param shuffleId
+   * @param appShuffleIdentifier: It is the combination of shuffle_stageId_stageAttemptNumber.
    * @return
    */
   public int createUniffleShuffleId(int shuffleId, String appShuffleIdentifier) {
