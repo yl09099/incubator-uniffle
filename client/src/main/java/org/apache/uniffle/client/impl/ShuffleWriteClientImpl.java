@@ -811,6 +811,8 @@ public class ShuffleWriteClientImpl implements ShuffleWriteClient {
           throw new RssSendFailedException(
               "Throw an exception because the report shuffle result status code is not SUCCESS.");
         }
+        throw new RssSendFailedException(
+            "Throw an exception because the report shuffle result status code is not SUCCESS.", e);
       }
     }
     if (blockReportTracker.values().stream().anyMatch(cnt -> cnt < replicaWrite)) {
