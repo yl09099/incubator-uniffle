@@ -1443,10 +1443,10 @@ public abstract class RssShuffleManagerBase implements RssShuffleManagerInterfac
         "Finish register shuffleId {} with {} ms", shuffleId, (System.currentTimeMillis() - start));
   }
 
-  protected RemoteStorageInfo getRemoteStorageInfo() {
+  @VisibleForTesting
+  public RemoteStorageInfo getRemoteStorageInfo() {
     String storageType = sparkConf.get(RssSparkConfig.RSS_STORAGE_TYPE.key());
-    RemoteStorageInfo defaultRemoteStorage =
-        new RemoteStorageInfo(sparkConf.get(RssSparkConfig.RSS_REMOTE_STORAGE_PATH.key(), ""));
+    RemoteStorageInfo defaultRemoteStorage = getDefaultRemoteStorageInfo(sparkConf);
     return ClientUtils.fetchRemoteStorage(
         appId, defaultRemoteStorage, dynamicConfEnabled, storageType, shuffleWriteClient);
   }
