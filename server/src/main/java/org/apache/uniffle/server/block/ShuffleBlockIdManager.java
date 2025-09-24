@@ -48,6 +48,8 @@ public interface ShuffleBlockIdManager {
 
   void removeBlockIdByAppId(String appId);
 
+  void removeBitmapLocks(String appId);
+
   long getTotalBlockCount();
 
   long getBlockCountByShuffleId(String appId, List<Integer> shuffleIds);

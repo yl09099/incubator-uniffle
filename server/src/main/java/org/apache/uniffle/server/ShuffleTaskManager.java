@@ -911,6 +911,7 @@ public class ShuffleTaskManager {
         manager.removeBlockIdByAppId(appId);
       }
       shuffleBlockIdManager.removeBlockIdByAppId(appId);
+      shuffleBlockIdManager.removeBitmapLocks(appId);
       shuffleBufferManager.removeBuffer(appId);
       shuffleFlushManager.removeResources(appId);
 
