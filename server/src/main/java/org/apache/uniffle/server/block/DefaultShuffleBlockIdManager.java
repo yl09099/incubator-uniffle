@@ -23,7 +23,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
@@ -212,12 +211,8 @@ public class DefaultShuffleBlockIdManager implements ShuffleBlockIdManager {
   }
 
   @Override
-  public void removeBlockIdByAppId(String appId) {
+  public void remove(String appId) {
     partitionsToBlockIds.remove(appId);
-  }
-
-  @Override
-  public void removeBitmapLocks(String appId) {
     bitmapLocks.remove(appId);
   }
 
@@ -255,7 +250,7 @@ public class DefaultShuffleBlockIdManager implements ShuffleBlockIdManager {
 
   private ReadWriteLock getLockForBitmap(String appId, int shuffleId, int bitmapArrLocation) {
     Map<String, ReadWriteLock> innerMap =
-        bitmapLocks.computeIfAbsent(appId, k -> new ConcurrentHashMap<>());
+        bitmapLocks.computeIfAbsent(appId, k -> JavaUtils.newConcurrentMap());
     String key = shuffleId + "_" + bitmapArrLocation;
     return innerMap.computeIfAbsent(key, k -> new ReentrantReadWriteLock());
   }

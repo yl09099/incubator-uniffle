@@ -138,12 +138,8 @@ public class PartitionedShuffleBlockIdManager implements ShuffleBlockIdManager {
   }
 
   @Override
-  public void removeBlockIdByAppId(String appId) {
+  public void remove(String appId) {
     partitionsToBlockIds.remove(appId);
-  }
-
-  @Override
-  public void removeBitmapLocks(String appId) {
     bitmapLocks.remove(appId);
   }
 
@@ -190,7 +186,7 @@ public class PartitionedShuffleBlockIdManager implements ShuffleBlockIdManager {
 
   private ReadWriteLock getLockForBitmap(String appId, int shuffleId, int partititionId) {
     Map<String, ReadWriteLock> innerMap =
-        bitmapLocks.computeIfAbsent(appId, k -> new ConcurrentHashMap<>());
+        bitmapLocks.computeIfAbsent(appId, k -> JavaUtils.newConcurrentMap());
     String key = shuffleId + "_" + partititionId;
     return innerMap.computeIfAbsent(key, k -> new ReentrantReadWriteLock());
   }

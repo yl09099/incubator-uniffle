@@ -908,10 +908,9 @@ public class ShuffleTaskManager {
 
       ShuffleBlockIdManager manager = shuffleTaskInfo.getShuffleBlockIdManager();
       if (manager != null) {
-        manager.removeBlockIdByAppId(appId);
+        manager.remove(appId);
       }
-      shuffleBlockIdManager.removeBlockIdByAppId(appId);
-      shuffleBlockIdManager.removeBitmapLocks(appId);
+      shuffleBlockIdManager.remove(appId);
       shuffleBufferManager.removeBuffer(appId);
       shuffleFlushManager.removeResources(appId);
 
