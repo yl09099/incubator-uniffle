@@ -16,116 +16,30 @@
   -->
 
 <template>
-  <div>
-    <el-row :gutter="20">
-      <el-col :span="4">
-        <router-link
-          class="router-link-active"
-          :to="{ path: '/shuffleserverpage/activeNodeList', query: { isExcludedPage: false } }"
-          @click.native="routerHandler"
-        >
-          <el-card class="box-card" shadow="hover">
-            <template #header>
-              <div class="card-header">
-                <span class="cardtile">Active</span>
-              </div>
-            </template>
-            <div class="activenode">{{ dataList.allshuffleServerSize.ACTIVE ?? 0 }}</div>
-          </el-card>
-        </router-link>
-      </el-col>
-      <el-col :span="4">
-        <router-link
-          class="router-link-active"
-          :to="{ path: '/shuffleserverpage/decommissioningNodeList', query: { isExcludedPage: false } }"
-          @click.native="routerHandler"
-        >
-          <el-card class="box-card" shadow="hover">
-            <template #header>
-              <div class="card-header">
-                <span class="cardtile">Decommissioning</span>
-              </div>
-            </template>
-            <div class="decommissioningnode">
-              {{ dataList.allshuffleServerSize.DECOMMISSIONING ?? 0 }}
-            </div>
-          </el-card>
-        </router-link>
-      </el-col>
-      <el-col :span="4">
-        <router-link
-          class="router-link-active"
-          :to="{ path: '/shuffleserverpage/decommissionedNodeList', query: { isExcludedPage: false } }"
-          @click.native="routerHandler"
-        >
-          <el-card class="box-card" shadow="hover">
-            <template #header>
-              <div class="card-header">
-                <span class="cardtile">Decommissioned</span>
-              </div>
-            </template>
-            <div class="decommissionednode">
-              {{ dataList.allshuffleServerSize.DECOMMISSIONED ?? 0 }}
-            </div>
-          </el-card>
-        </router-link>
-      </el-col>
-      <el-col :span="4">
-        <router-link
-          class="router-link-active"
-          :to="{ path: '/shuffleserverpage/lostNodeList', query: { isExcludedPage: false } }"
-          @click.native="routerHandler"
-          :updateTotalPage="updateTotalPage"
-        >
-          <el-card class="box-card" shadow="hover">
-            <template #header>
-              <div class="card-header">
-                <span class="cardtile">Lost</span>
-              </div>
-            </template>
-            <div class="lostnode">{{ dataList.allshuffleServerSize.LOST ?? 0 }}</div>
-          </el-card>
-        </router-link>
-      </el-col>
-      <el-col :span="4">
-        <router-link
-          class="router-link-active"
-          :to="{ path: '/shuffleserverpage/unhealthyNodeList', query: { isExcludedPage: false } }"
-          @click.native="routerHandler"
-        >
-          <el-card class="box-card" shadow="hover">
-            <template #header>
-              <div class="card-header">
-                <span class="cardtile">Unhealthy</span>
-              </div>
-            </template>
-            <div class="unhealthynode">{{ dataList.allshuffleServerSize.UNHEALTHY ?? 0 }}</div>
-          </el-card>
-        </router-link>
-      </el-col>
-      <el-col :span="4">
-        <router-link
-          class="router-link-active"
-          :to="{ path: '/shuffleserverpage/excludeNodeList', query: { isExcludedPage: true } }"
-          @click.native="routerHandler"
-        >
-          <el-card class="box-card" shadow="hover">
-            <template #header>
-              <div class="card-header">
-                <span class="cardtile">Excludes</span>
-              </div>
-            </template>
-            <div class="excludesnode">{{ dataList.allshuffleServerSize.EXCLUDED ?? 0 }}</div>
-          </el-card>
-        </router-link>
-      </el-col>
-    </el-row>
-    <el-divider />
-    <el-row :gutter="24">
-      <div style="width: 100%">
-        <router-view></router-view>
-      </div>
-    </el-row>
+  <div class="page-wrap">
+    <div class="stats-row">
+      <router-link class="stat-link" :to="{ path: '/shuffleserverpage/activeNodeList', query: { isExcludedPage: false } }" @click.native="routerHandler">
+        <div class="stat-card"><div class="stat-label">Active</div><div class="stat-value sv-success">{{ dataList.allshuffleServerSize.ACTIVE ?? 0 }}</div></div>
+      </router-link>
+      <router-link class="stat-link" :to="{ path: '/shuffleserverpage/decommissioningNodeList', query: { isExcludedPage: false } }" @click.native="routerHandler">
+        <div class="stat-card"><div class="stat-label">Decommissioning</div><div class="stat-value sv-primary">{{ dataList.allshuffleServerSize.DECOMMISSIONING ?? 0 }}</div></div>
+      </router-link>
+      <router-link class="stat-link" :to="{ path: '/shuffleserverpage/decommissionedNodeList', query: { isExcludedPage: false } }" @click.native="routerHandler">
+        <div class="stat-card"><div class="stat-label">Decommissioned</div><div class="stat-value sv-purple">{{ dataList.allshuffleServerSize.DECOMMISSIONED ?? 0 }}</div></div>
+      </router-link>
+      <router-link class="stat-link" :to="{ path: '/shuffleserverpage/lostNodeList', query: { isExcludedPage: false } }" @click.native="routerHandler" :updateTotalPage="updateTotalPage">
+        <div class="stat-card"><div class="stat-label">Lost</div><div class="stat-value sv-danger">{{ dataList.allshuffleServerSize.LOST ?? 0 }}</div></div>
+      </router-link>
+      <router-link class="stat-link" :to="{ path: '/shuffleserverpage/unhealthyNodeList', query: { isExcludedPage: false } }" @click.native="routerHandler">
+        <div class="stat-card"><div class="stat-label">Unhealthy</div><div class="stat-value sv-warning">{{ dataList.allshuffleServerSize.UNHEALTHY ?? 0 }}</div></div>
+      </router-link>
+      <router-link class="stat-link" :to="{ path: '/shuffleserverpage/excludeNodeList', query: { isExcludedPage: true } }" @click.native="routerHandler">
+        <div class="stat-card"><div class="stat-label">Excludes</div><div class="stat-value sv-default">{{ dataList.allshuffleServerSize.EXCLUDED ?? 0 }}</div></div>
+      </router-link>
+    </div>
+    <div class="table-section flex-fill">
+      <router-view></router-view>
+    </div>
   </div>
 </template>
 
@@ -136,46 +50,18 @@ import { useCurrentServerStore } from '@/store/useCurrentServerStore'
 
 export default {
   setup() {
-    const dataList = reactive({
-      allshuffleServerSize: {
-        ACTIVE: 0,
-        DECOMMISSIONED: 0,
-        DECOMMISSIONING: 0,
-        EXCLUDED: 0,
-        LOST: 0,
-        UNHEALTHY: 0
-      }
-    })
-
+    const dataList = reactive({ allshuffleServerSize: { ACTIVE: 0, DECOMMISSIONED: 0, DECOMMISSIONING: 0, EXCLUDED: 0, LOST: 0, UNHEALTHY: 0 } })
     const currentServerStore = useCurrentServerStore()
+
     async function getShuffleStatusTotalPage() {
-      const res = await getShufflegetStatusTotal()
-      dataList.allshuffleServerSize = res.data.data
+      try { const res = await getShufflegetStatusTotal(); dataList.allshuffleServerSize = res?.data?.data || dataList.allshuffleServerSize } catch (e) { console.warn('Failed to fetch shuffle status total:', e) }
     }
 
-    // The system obtains data from global variables and requests the interface to obtain new data after data changes.
-    currentServerStore.$subscribe((mutable, state) => {
-      if (state.currentServer) {
-        getShuffleStatusTotalPage()
-      }
-    })
+    currentServerStore.$subscribe((mutable, state) => { if (state.currentServer) getShuffleStatusTotalPage() })
+    onMounted(() => { if (currentServerStore.currentServer) getShuffleStatusTotalPage() })
 
-    onMounted(() => {
-      // If the coordinator address to request is not found in the global variable, the request is not initiated.
-      if (currentServerStore.currentServer) {
-        getShuffleStatusTotalPage()
-      }
-    })
-
-    const routerHandler = () => {
-      getShuffleStatusTotalPage()
-    }
-    /**
-     * After the missing server list is removed, the number of callbacks is reduced.
-     */
-    provide('updateTotalPage', () => {
-      getShuffleStatusTotalPage()
-    })
+    const routerHandler = () => { getShuffleStatusTotalPage() }
+    provide('updateTotalPage', () => { getShuffleStatusTotalPage() })
 
     return { dataList, routerHandler }
   }
@@ -183,59 +69,9 @@ export default {
 </script>
 
 <style scoped>
-.cardtile {
-  font-size: larger;
-}
-
-/* Remove the underscore from the route label. */
-.router-link-active {
+.stat-link {
   text-decoration: none;
-}
-
-.activenode {
-  font-family: 'Lantinghei SC';
-  font-style: normal;
-  font-weight: bolder;
-  font-size: 30px;
-  color: green;
-}
-
-.decommissioningnode {
-  font-family: 'Lantinghei SC';
-  font-style: normal;
-  font-weight: bolder;
-  font-size: 30px;
-  color: #00c4ff;
-}
-
-.decommissionednode {
-  font-family: 'Lantinghei SC';
-  font-style: normal;
-  font-weight: bolder;
-  font-size: 30px;
-  color: blue;
-}
-
-.lostnode {
-  font-family: 'Lantinghei SC';
-  font-style: normal;
-  font-weight: bolder;
-  font-size: 30px;
-  color: red;
-}
-
-.unhealthynode {
-  font-family: 'Lantinghei SC';
-  font-style: normal;
-  font-weight: bolder;
-  font-size: 30px;
-  color: #ff8800;
-}
-
-.excludesnode {
-  font-family: 'Lantinghei SC';
-  font-style: normal;
-  font-weight: bolder;
-  font-size: 30px;
+  flex: 1;
+  display: block;
 }
 </style>

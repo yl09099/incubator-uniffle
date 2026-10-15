@@ -16,94 +16,55 @@
   -->
 
 <template>
-  <div>
-    <el-button type="success" @click="dialogFormVisible = true" v-show="isExcludePage()"> Add Node </el-button>
-    <el-button type="danger" @click="handleDeleteNode" v-show="isExcludePage()">Delete({{ selectItemNum }})</el-button>
+  <div class="node-list-container">
+    <div class="node-list-toolbar">
+      <el-button size="small" type="success" @click="dialogFormVisible = true" v-show="isExcludePage()">Add Node</el-button>
+      <el-button size="small" type="danger" @click="handleDeleteNode" v-show="isExcludePage()">Delete({{ selectItemNum }})</el-button>
+    </div>
     <el-table
       :data="listPageData.tableData"
-      height="800"
-      style="width: 100%"
+      height="100%"
+      width="100%"
+      class="node-table"
       :row-key="rowKey"
       :default-sort="sortColumn"
       @sort-change="sortChangeEvent"
       @selection-change="handlerSelectionChange"
     >
-      <el-table-column type="selection" width="55" v-show="isExcludePage()"/>
-      <el-table-column prop="id" label="Id" min-width="140" sortable fixed />
-      <el-table-column label="NodeInfo(ip:jetty/grpc/netty)" min-width="140" >
+      <el-table-column type="selection" width="45" v-show="isExcludePage()"/>
+      <el-table-column prop="id" label="Id" min-width="180" sortable fixed />
+      <el-table-column label="NodeInfo(ip:jetty/grpc/netty)" min-width="180">
         <template v-slot="{ row }">
-          <div class="mb-4">
-            {{ row.ip }}:{{ row.jettyPort }}/{{ row.grpcPort }}/{{ row.nettyPort }}
-          </div>
+          {{ row.ip }}:{{ row.jettyPort }}/{{ row.grpcPort }}/{{ row.nettyPort }}
         </template>
       </el-table-column>
-      <el-table-column
-        prop="usedMemory"
-        label="UsedMem"
-        min-width="80"
-        :formatter="memFormatter"
-        sortable
-      />
-      <el-table-column
-        prop="preAllocatedMemory"
-        label="PreAllocatedMem"
-        min-width="100"
-        :formatter="memFormatter"
-        sortable
-      />
-      <el-table-column
-        prop="availableMemory"
-        label="AvailableMem"
-        min-width="100"
-        :formatter="memFormatter"
-        sortable
-      />
+      <el-table-column prop="usedMemory" label="UsedMem" min-width="90" :formatter="memFormatter" sortable />
+      <el-table-column prop="preAllocatedMemory" label="PreAllocMem" min-width="100" :formatter="memFormatter" sortable />
+      <el-table-column prop="availableMemory" label="AvailMem" min-width="90" :formatter="memFormatter" sortable />
       <el-table-column prop="eventNumInFlush" label="FlushNum" min-width="80" sortable />
       <el-table-column prop="status" label="Status" min-width="80" sortable />
-      <el-table-column
-        prop="startTime"
-        label="StartTime"
-        min-width="120"
-        :formatter="dateFormatter"
-        sortable
-      />
-      <el-table-column
-        prop="registrationTime"
-        label="RegistrationTime"
-        min-width="120"
-        :formatter="dateFormatter"
-        sortable
-      />
-      <el-table-column
-        prop="timestamp"
-        label="HeartbeatTime"
-        min-width="120"
-        :formatter="dateFormatter"
-        sortable
-      />
-      <el-table-column label="Operations" min-width="240">
+      <el-table-column prop="startTime" label="StartTime" min-width="120" :formatter="dateFormatter" sortable />
+      <el-table-column prop="registrationTime" label="RegTime" min-width="120" :formatter="dateFormatter" sortable />
+      <el-table-column prop="timestamp" label="Heartbeat" min-width="120" :formatter="dateFormatter" sortable />
+      <el-table-column label="Operations" min-width="260">
         <template v-slot="{ row }">
-          <div class="mb-4">
-            <el-button type="warning" @click="handlerServerConf(row)">conf</el-button>
-            <el-button type="primary" @click="handlerServerMetrics(row)">metrics</el-button>
-            <el-button type="success" @click="handlerServerPrometheusMetrics(row)">metrics(prom)</el-button>
-            <el-button type="info" @click="handlerServerStacks(row)">stacks</el-button>
+          <div class="op-btns">
+            <el-button size="small" link type="warning" @click="handlerServerConf(row)">conf</el-button>
+            <el-button size="small" link type="primary" @click="handlerServerMetrics(row)">metrics</el-button>
+            <el-button size="small" link type="success" @click="handlerServerPrometheusMetrics(row)">prom</el-button>
+            <el-button size="small" link type="info" @click="handlerServerStacks(row)">stacks</el-button>
           </div>
         </template>
       </el-table-column>
-      <el-table-column prop="tags" label="Tags" min-width="140" />
-      <el-table-column label="Version" min-width="140">
+      <el-table-column prop="tags" label="Tags" min-width="120" />
+      <el-table-column label="Version" min-width="120">
         <template v-slot="{ row }">
-          <div class="mb-4">
-            {{ row.version }}_{{ row.gitCommitId }}
-          </div>
+          {{ row.version }}_{{ row.gitCommitId }}
         </template>
       </el-table-column>
-      <el-table-column v-if="isShowRemove" label="Operations(admin)">
+      <el-table-column v-if="isShowRemove" label="Admin" min-width="80">
         <template v-slot:default="scope">
-          <el-button size="small" type="danger" @click="showDeleteConfirm(scope.row)">
-            Remove
-          </el-button>
+          <el-button size="small" link type="danger" @click="showDeleteConfirm(scope.row)">Remove</el-button>
         </template>
       </el-table-column>
       <el-table-column prop="displayMetrics" label="DisplayMetrics" min-width="120">
@@ -133,8 +94,8 @@
       </el-form>
       <template #footer>
         <div class="dialog-footer">
-          <el-button @click="dialogFormVisible = false">Cancel</el-button>
-          <el-button type="primary" @click="handleConfirmAddHandler"> Confirm </el-button>
+          <el-button size="small" @click="dialogFormVisible = false">Cancel</el-button>
+          <el-button size="small" type="primary" @click="handleConfirmAddHandler">Confirm</el-button>
         </div>
       </template>
     </el-dialog>
@@ -508,5 +469,15 @@ export default {
 }
 .dialog-wrapper {
   width: 50%;
+}
+
+.node-list-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.node-table {
+  flex: 1;
 }
 </style>

@@ -21,6 +21,7 @@ import App from './App.vue'
 import ElementPlus from 'element-plus'
 import * as ElementPlusIconsVue from '@element-plus/icons-vue'
 import 'element-plus/dist/index.css'
+import '@/styles/page.css'
 import router from '@/router'
 // import '@/mock' // With this annotation turned on, you can use the front-end mock data without requesting a background interface.
 

@@ -1,0 +1,218 @@
+/* Global page design system for Uniffle Dashboard */
+
+/* === Layout tokens === */
+:root {
+  --page-bg: #f5f7fa;
+  --card-bg: #ffffff;
+  --card-border: #e8eaed;
+  --card-radius: 8px;
+  --card-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+  --card-header-bg: #fafbfc;
+  --card-header-border: #e8eaed;
+  --section-title-color: #1d1e3f;
+  --section-title-size: 14px;
+  --text-secondary: #8c8ea6;
+  --text-primary: #303133;
+  --stat-value-size: 26px;
+  --stat-label-size: 12px;
+  --gap-md: 16px;
+  --gap-sm: 12px;
+}
+
+/* === Page wrapper: all pages use this === */
+.page-wrap {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  gap: var(--gap-md);
+}
+
+/* === Section card: unified card style === */
+.page-section {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: var(--card-radius);
+  box-shadow: var(--card-shadow);
+  overflow: hidden;
+}
+
+.page-section-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 20px;
+  background: var(--card-header-bg);
+  border-bottom: 1px solid var(--card-header-border);
+}
+
+.page-section-title {
+  font-size: var(--section-title-size);
+  font-weight: 600;
+  color: var(--section-title-color);
+  letter-spacing: 0.3px;
+}
+
+.page-section-icon {
+  color: #1565c0;
+}
+
+.page-section-body {
+  padding: 16px 20px;
+}
+
+/* === Stats row: compact number cards === */
+.stats-row {
+  display: flex;
+  gap: var(--gap-sm);
+  flex-shrink: 0;
+}
+
+.stat-card {
+  flex: 1;
+  text-align: center;
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: var(--card-radius);
+  box-shadow: var(--card-shadow);
+  padding: 12px 8px;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.stat-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.stat-label {
+  font-size: var(--stat-label-size);
+  color: var(--text-secondary);
+  margin-bottom: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.stat-value {
+  font-size: var(--stat-value-size);
+  font-weight: 700;
+  font-family: 'DIN Alternate', 'Helvetica Neue', monospace;
+  line-height: 1.2;
+}
+
+/* Stat value colors */
+.sv-success { color: #52c41a; }
+.sv-primary { color: #1890ff; }
+.sv-warning { color: #faad14; }
+.sv-danger  { color: #f5222d; }
+.sv-purple  { color: #722ed1; }
+.sv-default { color: var(--text-primary); }
+
+/* === Table section: flex-fill table containers === */
+.table-section {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: var(--card-radius);
+  box-shadow: var(--card-shadow);
+  overflow: hidden;
+}
+
+.table-section-bar {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  padding: 10px 20px;
+  background: var(--card-header-bg);
+  border-bottom: 1px solid var(--card-header-border);
+}
+
+.table-section-title {
+  font-size: var(--section-title-size);
+  font-weight: 600;
+  color: var(--section-title-color);
+}
+
+/* === Utility: fill remaining vertical space === */
+.flex-fill {
+  flex: 1;
+  min-height: 0;
+}
+
+/* === Descriptions item label === */
+.cell-item {
+  display: flex;
+  align-items: center;
+}
+
+/* === Search input in table header === */
+.table-search-input {
+  padding: 4px 16px;
+}
+
+/* === Global font-size overrides for Element Plus === */
+.el-table {
+  font-size: 13px;
+}
+
+.el-table th.el-table__cell {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.el-table .cell {
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.el-descriptions__label {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.el-descriptions__content {
+  font-size: 13px;
+}
+
+.el-button--small {
+  font-size: 12px;
+}
+
+.el-button--small.is-link {
+  font-size: 12px;
+}
+
+.el-input--small .el-input__inner {
+  font-size: 12px;
+}
+
+.el-dialog {
+  font-size: 13px;
+}
+
+.el-dialog .el-button {
+  font-size: 12px;
+}
+
+.el-tag {
+  font-size: 12px;
+}
+
+/* === Toolbar (matches table-section-bar) === */
+.node-list-toolbar {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  background: var(--card-header-bg);
+  border-bottom: 1px solid var(--card-header-border);
+}
+
+/* === Operations buttons in table === */
+.op-btns {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 4px;
+}
