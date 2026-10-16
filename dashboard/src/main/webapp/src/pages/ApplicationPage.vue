@@ -28,7 +28,7 @@
       </div>
     </div>
 
-    <div class="table-section" style="flex: 2">
+    <div class="table-section user-rank-section">
       <div class="table-section-bar">
         <el-icon :size="14" class="page-section-icon"><User /></el-icon>
         <span class="table-section-title">User App Ranking</span>

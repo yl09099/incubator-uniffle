@@ -42,10 +42,10 @@
           </el-descriptions-item>
           <el-descriptions-item>
             <template #label><div class="cell-item"><el-icon :style="iconStyle"><Wallet /></el-icon> Monitoring</div></template>
-            <div>
+            <div class="monitoring-btns">
               <el-button type="primary" size="small" @click="handlerMetrics">Metrics</el-button>
               <el-button type="success" size="small" @click="handlerPromMetrics">Prometheus</el-button>
-              <el-button type="info" size="small" @click="handlerStacks">Stacks</el-button>
+              <el-button type="warning" size="small" @click="handlerStacks">Stacks</el-button>
             </div>
           </el-descriptions-item>
           <el-descriptions-item>
@@ -132,3 +132,10 @@ export default {
   }
 }
 </script>
+
+<style scoped>
+.monitoring-btns {
+  display: flex;
+  gap: 8px;
+}
+</style>

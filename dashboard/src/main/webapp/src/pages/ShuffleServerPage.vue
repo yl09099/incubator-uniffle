@@ -18,23 +18,17 @@
 <template>
   <div class="page-wrap">
     <div class="stats-row">
-      <router-link class="stat-link" :to="{ path: '/shuffleserverpage/activeNodeList', query: { isExcludedPage: false } }" @click.native="routerHandler">
-        <div class="stat-card"><div class="stat-label">Active</div><div class="stat-value sv-success">{{ dataList.allshuffleServerSize.ACTIVE ?? 0 }}</div></div>
-      </router-link>
-      <router-link class="stat-link" :to="{ path: '/shuffleserverpage/decommissioningNodeList', query: { isExcludedPage: false } }" @click.native="routerHandler">
-        <div class="stat-card"><div class="stat-label">Decommissioning</div><div class="stat-value sv-primary">{{ dataList.allshuffleServerSize.DECOMMISSIONING ?? 0 }}</div></div>
-      </router-link>
-      <router-link class="stat-link" :to="{ path: '/shuffleserverpage/decommissionedNodeList', query: { isExcludedPage: false } }" @click.native="routerHandler">
-        <div class="stat-card"><div class="stat-label">Decommissioned</div><div class="stat-value sv-purple">{{ dataList.allshuffleServerSize.DECOMMISSIONED ?? 0 }}</div></div>
-      </router-link>
-      <router-link class="stat-link" :to="{ path: '/shuffleserverpage/lostNodeList', query: { isExcludedPage: false } }" @click.native="routerHandler" :updateTotalPage="updateTotalPage">
-        <div class="stat-card"><div class="stat-label">Lost</div><div class="stat-value sv-danger">{{ dataList.allshuffleServerSize.LOST ?? 0 }}</div></div>
-      </router-link>
-      <router-link class="stat-link" :to="{ path: '/shuffleserverpage/unhealthyNodeList', query: { isExcludedPage: false } }" @click.native="routerHandler">
-        <div class="stat-card"><div class="stat-label">Unhealthy</div><div class="stat-value sv-warning">{{ dataList.allshuffleServerSize.UNHEALTHY ?? 0 }}</div></div>
-      </router-link>
-      <router-link class="stat-link" :to="{ path: '/shuffleserverpage/excludeNodeList', query: { isExcludedPage: true } }" @click.native="routerHandler">
-        <div class="stat-card"><div class="stat-label">Excludes</div><div class="stat-value sv-default">{{ dataList.allshuffleServerSize.EXCLUDED ?? 0 }}</div></div>
+      <router-link
+        v-for="item in statCards"
+        :key="item.path"
+        class="stat-link"
+        :to="{ path: item.path, query: { isExcludedPage: item.isExcluded } }"
+        @click.native="routerHandler"
+      >
+        <div class="stat-card" :class="{ 'stat-card--active': activeRoute === item.path }">
+          <div class="stat-label">{{ item.label }}</div>
+          <div class="stat-value" :class="item.colorClass">{{ dataList.allshuffleServerSize[item.key] ?? 0 }}</div>
+        </div>
       </router-link>
     </div>
     <div class="table-section flex-fill">
@@ -44,14 +38,27 @@
 </template>
 
 <script>
-import { onMounted, reactive, provide } from 'vue'
+import { onMounted, reactive, provide, computed } from 'vue'
+import { useRoute } from 'vue-router'
 import { getShufflegetStatusTotal } from '@/api/api'
 import { useCurrentServerStore } from '@/store/useCurrentServerStore'
 
 export default {
   setup() {
+    const route = useRoute()
     const dataList = reactive({ allshuffleServerSize: { ACTIVE: 0, DECOMMISSIONED: 0, DECOMMISSIONING: 0, EXCLUDED: 0, LOST: 0, UNHEALTHY: 0 } })
     const currentServerStore = useCurrentServerStore()
+
+    const statCards = [
+      { label: 'Active', key: 'ACTIVE', path: '/shuffleserverpage/activeNodeList', name: 'activeNodeList', isExcluded: false, colorClass: 'sv-success' },
+      { label: 'Decommissioning', key: 'DECOMMISSIONING', path: '/shuffleserverpage/decommissioningNodeList', name: 'decommissioningNodeList', isExcluded: false, colorClass: 'sv-primary' },
+      { label: 'Decommissioned', key: 'DECOMMISSIONED', path: '/shuffleserverpage/decommissionedNodeList', name: 'decommissionedNodeList', isExcluded: false, colorClass: 'sv-purple' },
+      { label: 'Lost', key: 'LOST', path: '/shuffleserverpage/lostNodeList', name: 'lostNodeList', isExcluded: false, colorClass: 'sv-danger' },
+      { label: 'Unhealthy', key: 'UNHEALTHY', path: '/shuffleserverpage/unhealthyNodeList', name: 'unhealthyNodeList', isExcluded: false, colorClass: 'sv-warning' },
+      { label: 'Excludes', key: 'EXCLUDED', path: '/shuffleserverpage/excludeNodeList', name: 'excludeNodeList', isExcluded: true, colorClass: 'sv-default' }
+    ]
+
+    const activeRoute = computed(() => route.path)
 
     async function getShuffleStatusTotalPage() {
       try { const res = await getShufflegetStatusTotal(); dataList.allshuffleServerSize = res?.data?.data || dataList.allshuffleServerSize } catch (e) { console.warn('Failed to fetch shuffle status total:', e) }
@@ -63,7 +70,7 @@ export default {
     const routerHandler = () => { getShuffleStatusTotalPage() }
     provide('updateTotalPage', () => { getShuffleStatusTotalPage() })
 
-    return { dataList, routerHandler }
+    return { dataList, routerHandler, statCards, activeRoute }
   }
 }
 </script>
@@ -73,5 +80,12 @@ export default {
   text-decoration: none;
   flex: 1;
   display: block;
+  color: inherit;
+}
+
+.stat-card--active {
+  border-color: var(--brand-default) !important;
+  background: var(--bg-surface-200) !important;
+  box-shadow: 0 0 0 1px var(--brand-default);
 }
 </style>
